@@ -96,23 +96,33 @@ naturalnie.
 ```
 Aksolotle to kolorowanka dla dzieci w wieku 4-8 lat z 40 wzorami uroczych
 aksolotków w podwodnym świecie. Grube kontury i duże pola sprawiają, że
-kolorowanie jest łatwe dla małych dłoni i kończy się poczuciem sukcesu.
+kolorowanie jest łatwe dla małych dłoni.
 
 Co znajdziesz w środku:
 - 40 wzorów aksolotków: wśród roślin i bąbelków, w filiżance, z koroną, z
   balonami i wiele innych.
 - Grube, wyraźne linie i duże powierzchnie do kolorowania.
-- Jeden wzór na stronie, z pustą stroną z tyłu, żeby mazaki nie przebijały.
+- Jeden wzór na stronie, druk jednostronny z pustą stroną z tyłu, żeby mazaki
+  nie przebijały.
 - Duży format 8,5 x 11 cala.
 
-Dlaczego warto:
-- Kolorowanie ćwiczy motorykę małą i koordynację ręka-oko.
-- Wycisza i pomaga się zrelaksować po dniu w przedszkolu.
-- Buduje pewność siebie, bo proste kształty łatwo pokolorować bez frustracji.
+Co daje dziecku:
+- Ćwiczy motorykę małą, koordynację ręka-oko i precyzję.
+- Uczy cierpliwości i skupienia, wycisza po dniu w przedszkolu.
+- Proste kształty łatwo pokolorować, więc dziecko kończy z poczuciem sukcesu,
+  bez frustracji.
 
-Świetny pomysł na prezent dla małego miłośnika zwierząt i morskiego świata.
-Chwyćcie za kredki i zacznijcie kolorować razem.
+Aksolotek meksykański żyje tylko w jednym jeziorze w Meksyku, więc przy
+kolorowaniu poznacie ciekawe zwierzątko. Świetny pomysł na prezent dla małego
+miłośnika zwierząt i morskiego świata. Usiądźcie razem, chwyćcie kredki i
+zacznijcie kolorować.
 ```
+
+Co dołożyliśmy z analizy konkurencji (ich argumenty, nasz styl, bez kopiowania
+zdań): motoryka mała, koordynacja ręka-oko, precyzja, cierpliwość i skupienie,
+wyciszenie po przedszkolu, poczucie sukcesu bez frustracji, ciekawostka o
+aksolotku meksykańskim oraz wspólne kolorowanie z rodziną. Świadomie pomijamy
+frazesy konkurencji (pytania-haczyki, "absolutny hit", "pełna magii podróż").
 
 ## Kategorie KDP (propozycja)
 
