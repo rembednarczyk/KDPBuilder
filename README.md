@@ -1,42 +1,114 @@
 # KDPBuilder
 
-Narzędzia do przygotowania kolorowanek dla dzieci pod Amazon KDP.
+Powtarzalny pipeline do generowania i składania kolorowanek dla dzieci pod
+Amazon KDP. Bierze surową grafikę liniową z generatywnego AI, czyści ją do
+druku, składa jednostronne wnętrze PDF i sprawdza je walidatorem KDP.
 
-## Skill: kdp-compliance
+Styl produktu: bold and easy dla wieku 3-6 lat. Grube kontury, proste kształty,
+jeden wzór na stronę, pusta strona z tyłu (druk jednostronny), czarne linie na
+czystej bieli.
 
-Skill `kdp-compliance` trzyma specyfikacje druku KDP w jednym miejscu i uruchamia
-automatyczną walidację gotowego wnętrza PDF. Znajduje się w
-`.claude/skills/kdp-compliance/`.
+## Struktura
 
-Zawartość:
-
-- `SKILL.md` — opis, workflow, uruchomienie walidatora i checklista ręczna.
-- `references/kdp_specs.json` — jedno źródło prawdy dla specyfikacji KDP
-  (wymiary, spad, DPI, marginesy, limity stron). Nie powielaj tych liczb w kodzie.
-- `scripts/validate_kdp_pdf.py` — walidator PDF (PyMuPDF, opcjonalnie numpy).
-- `requirements.txt` — zależności Pythona.
-
-## Szybki start
-
-```bash
-pip install -r .claude/skills/kdp-compliance/requirements.txt
-
-python .claude/skills/kdp-compliance/scripts/validate_kdp_pdf.py interior.pdf \
-  --trim 8.5x11 --paper bw_white --check-single-sided
+```
+kdpbuilder/                 pakiet pipeline
+  prompts.py                krok 1: prompty pod line art
+  imageprep.py              kroki 3-4: czyszczenie do B&W, pogrubianie linii
+  assemble.py               kroki 5-6: skalowanie do DPI, składanie wnętrza PDF
+  specs.py                  odczyt specyfikacji KDP z jednego źródła prawdy
+  cli.py                    interfejs wiersza poleceń
+.claude/skills/kdp-compliance/   skill z walidatorem i specyfikacjami KDP
+  references/kdp_specs.json  jedyne źródło prawdy dla liczb (wymiary, spad, DPI)
+  scripts/validate_kdp_pdf.py  walidator gotowego wnętrza
+tests/                      testy pipeline i walidacji
 ```
 
-Kod wyjścia 0 gdy brak błędów krytycznych, 1 gdy jest FAIL. `--json` daje wynik
-maszynowy do testów, `--strict` traktuje ostrzeżenia jak błędy i działa jako
-bramka przed publikacją.
+Specyfikacje KDP mają jedno źródło prawdy: `kdp_specs.json` w skillu.
+`kdpbuilder.specs` czyta ten plik, więc generator i walidator się nie rozjadą.
+Nie powielaj liczb w kodzie.
 
-## Co walidator sprawdza automatycznie
+## Instalacja
 
-Rozmiar strony (trim vs spad, spójny w całym pliku), limity liczby stron, efektywne
-DPI, kolor w książce B&W, cieniowanie i gradienty, puste strony przy druku
-jednostronnym, osadzenie fontów, szyfrowanie.
+```bash
+pip install -r requirements.txt
+# lub jako pakiet z komendą `kdpbuilder`:
+pip install -e .
+```
 
-## Co zostaje do sprawdzenia ręcznie
+## Workflow (kroki 1-6 z instrukcji projektu)
 
-Grubość linii (min 0,75 pkt), strefa bezpieczna, zamknięte kontury, artefakty z
-generacji AI, realny wygląd druku. Zamów egzemplarz próbny przed skalowaniem tytułu.
-Pełna checklista jest w `SKILL.md`.
+### 1. Prompt pod grafikę liniową
+
+```bash
+python -m kdpbuilder.cli prompt "friendly cat" --json
+```
+
+Zwraca prompt pozytywny i negatywny w stylu bold and easy (line art, grube
+kontury, bez cieni i gradientów, biale tlo, jeden wzor wycentrowany). Grafikę
+generujesz swoim narzędziem AI. Krok 2 (ocena spójności stylu) robisz ręcznie.
+
+### 3-4. Czyszczenie do czystego B&W
+
+```bash
+python -m kdpbuilder.cli prep raw/ clean/ --thicken 1
+```
+
+Progowanie usuwa szarości, cienie i gradienty (domyślnie Otsu, albo
+`--threshold 0-255`). `--thicken N` pogrubia linie o N pikseli. Autokadrowanie
+wyrównuje ramkę wokół wzoru (`--no-crop` wyłącza).
+
+### 5-6. Składanie wnętrza PDF
+
+```bash
+python -m kdpbuilder.cli assemble clean/ --out interior.pdf --trim 8.5x11
+```
+
+Każdy wzór trafia na stronę w dokładnym formacie KDP, przy 300 DPI, z pustą
+stroną z tyłu (druk jednostronny). Dla grafiki sięgającej krawędzi dodaj
+`--bleed` (strona = format + spad, wzór wypełnia do brzegu).
+
+### Bramka: walidacja
+
+```bash
+python -m kdpbuilder.cli validate interior.pdf --trim 8.5x11 --strict
+```
+
+Kod wyjścia 0 gdy brak błędów krytycznych, 1 przy FAIL (a z `--strict` również
+przy ostrzeżeniach). Nadaje się jako krok build przed publikacją.
+
+### Wszystko naraz
+
+```bash
+python -m kdpbuilder.cli build raw/ --out interior.pdf --trim 8.5x11 \
+  --thicken 1 --strict
+```
+
+Czyści, składa i waliduje w jednym przebiegu.
+
+## Co jest automatyczne, a co ręczne
+
+Automatycznie: konwersja do B&W, usuwanie szarości i gradientów, pogrubianie
+linii, skalowanie do 300 DPI, składanie jednostronne ze spadem lub bez, kontrola
+rozmiaru stron, limitów, DPI, koloru, cieniowania, pustych stron, fontów i
+szyfrowania.
+
+Ręcznie (krok 6 i publikacja): grubość linii w punktach, strefa bezpieczna,
+zamknięte kontury i pola do kolorowania, artefakty z generacji AI, realny
+wygląd druku. Zamów egzemplarz próbny przed skalowaniem tytułu. Pełna checklista
+jest w `.claude/skills/kdp-compliance/SKILL.md`.
+
+## Testy
+
+```bash
+python -m pytest
+```
+
+Sprawdzają odczyt specyfikacji, czyszczenie obrazów, geometrię składania (format,
+spad, 300 DPI, puste strony) oraz przejście gotowego PDF przez walidator.
+
+## Zgodność i ryzyka
+
+Przy publikacji zaznacz w KDP "Yes, AI-Generated" dla obrazów. Nie wrzucaj masowo
+niemal identycznych tytułów w jedną niszę. Bez postaci chronionych, celebrytów i
+znaków towarowych. Czysto AI-owa grafika ma ograniczoną ochronę prawnoautorską.
+Kwestie podatkowe (źródło przychodu, ryczałt) potwierdź z doradcą podatkowym.

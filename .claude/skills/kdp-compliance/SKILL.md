@@ -124,6 +124,11 @@ or a look at the source file:
 
 ## Using this in the generation app
 
+The `kdpbuilder` package at the repo root is that app. Its `specs.py` loads this
+JSON, `imageprep.py` cleans line art to pure B&W, and `assemble.py` builds the
+single-sided interior; `kdpbuilder.cli build` runs the whole pipeline and then
+this validator as the final gate.
+
 - Load specs from `references/kdp_specs.json`; do not restate the numbers in code.
 - Run `validate_kdp_pdf.py --json --strict` as a build step and fail the build on
   any FAIL. Parse `report.json` in tests.

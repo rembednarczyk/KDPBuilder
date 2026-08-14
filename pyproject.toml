@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kdpbuilder"
+version = "0.1.0"
+description = "Generate and assemble children's coloring books for Amazon KDP."
+requires-python = ">=3.9"
+dependencies = [
+    "pymupdf>=1.24",
+    "numpy>=1.24",
+    "pillow>=10.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+kdpbuilder = "kdpbuilder.cli:main"
+
+[tool.setuptools]
+packages = ["kdpbuilder"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
