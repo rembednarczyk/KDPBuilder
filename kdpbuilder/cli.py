@@ -189,6 +189,8 @@ def cmd_cover(args) -> int:
             title_outline2=args.title_outline2, title_grad_top=args.title_grad_top,
             title_grad_bottom=args.title_grad_bottom, rich_title=not args.no_rich_title,
             banner_color=args.banner, banner_alpha=args.banner_alpha,
+            banner_style=args.banner_style, banner_border=args.banner_border,
+            banner_text_color=args.banner_text,
             thumbnails=thumbs, count_badge=args.count_badge,
             logo=logo_img,
             logo_where=args.logo_where, logo_height_in=args.logo_height,
@@ -434,8 +436,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--title-grad-top", default=None, help="Title gradient top color (hex).")
     p.add_argument("--title-grad-bottom", default=None, help="Title gradient bottom color (hex).")
     p.add_argument("--no-rich-title", action="store_true", help="Use the plain outlined title instead of the rich effect.")
-    p.add_argument("--banner", default="#FFFFFF", help="Subtitle banner color (hex).")
-    p.add_argument("--banner-alpha", type=int, default=210, help="Banner opacity 0-255.")
+    p.add_argument("--banner", default="#FFFFFF", help="Subtitle banner fill color (hex).")
+    p.add_argument("--banner-alpha", type=int, default=210, help="Banner opacity 0-255 (pill only).")
+    p.add_argument("--banner-style", default="scallop", choices=["scallop", "ribbon", "pill"],
+                   help="Subtitle banner shape.")
+    p.add_argument("--banner-border", default=None, help="Banner border color (hex); defaults to a darker fill.")
+    p.add_argument("--banner-text", default=None, help="Banner text color (hex); auto-contrast by default.")
     p.add_argument("--thumbs", default=None, help="Folder of interior images to show as back-cover thumbnails.")
     p.add_argument("--count-badge", default=None, help="Text for the front count sticker, e.g. '40 wzorow'.")
     p.add_argument("--logo", default=None, help="Publisher logo (SVG or transparent PNG). Defaults to the bundled Kolorowe Skarby logo.")
