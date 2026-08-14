@@ -167,6 +167,14 @@ def cmd_cover(args) -> int:
         sys.stderr.write("Provide --front IMAGE, or --theme with --generate-front.\n")
         return 2
 
+    logo_path = None if args.no_logo else (args.logo or kcover.DEFAULT_LOGO)
+    logo_img = None
+    if logo_path and Path(logo_path).exists():
+        try:
+            logo_img = kcover.load_logo_image(logo_path)
+        except RuntimeError as e:
+            sys.stderr.write(str(e) + "\n")
+            return 2
     thumbs = None
     if args.thumbs:
         tdir = Path(args.thumbs)
@@ -182,6 +190,8 @@ def cmd_cover(args) -> int:
             title_grad_bottom=args.title_grad_bottom, rich_title=not args.no_rich_title,
             banner_color=args.banner, banner_alpha=args.banner_alpha,
             thumbnails=thumbs, count_badge=args.count_badge,
+            logo=logo_img,
+            logo_where=args.logo_where, logo_height_in=args.logo_height,
             wrap=not args.no_wrap, decorations=not args.no_decorations,
             font_title=args.font_title or kcover.DEFAULT_TITLE_FONT,
             font_body=args.font_body or kcover.DEFAULT_BODY_FONT, specs=specs,
@@ -428,6 +438,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--banner-alpha", type=int, default=210, help="Banner opacity 0-255.")
     p.add_argument("--thumbs", default=None, help="Folder of interior images to show as back-cover thumbnails.")
     p.add_argument("--count-badge", default=None, help="Text for the front count sticker, e.g. '40 wzorow'.")
+    p.add_argument("--logo", default=None, help="Publisher logo (SVG or transparent PNG). Defaults to the bundled Kolorowe Skarby logo.")
+    p.add_argument("--no-logo", action="store_true", help="Do not place any publisher logo.")
+    p.add_argument("--logo-where", default="back", choices=["back", "front"], help="Where to place the logo.")
+    p.add_argument("--logo-height", type=float, default=0.75, help="Logo height in inches.")
     p.add_argument("--no-wrap", action="store_true", help="Do not extend the art across the back (solid back).")
     p.add_argument("--no-decorations", action="store_true", help="Skip bubbles and sparkle accents.")
     p.add_argument("--font-title", default=None, help="TTF path for the title.")

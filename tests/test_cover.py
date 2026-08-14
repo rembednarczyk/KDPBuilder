@@ -82,6 +82,18 @@ def test_wraparound_with_thumbnails(tmp_path, specs, front):
     assert pymupdf.open(out).page_count == 1
 
 
+def test_logo_placed(tmp_path, specs, front):
+    logo = Image.new("RGBA", (400, 200), (0, 0, 0, 0))
+    ImageDraw.Draw(logo).rounded_rectangle((10, 10, 390, 190), radius=30, fill=(255, 0, 0, 255))
+    out = tmp_path / "logo.pdf"
+    summary = kcover.build_cover(
+        front, out, trim="8.5x11", page_count=80, paper="bw_white",
+        title="Aksolotki", logo=logo, logo_where="back", dpi=120, specs=specs,
+    )
+    assert summary["logo"] is True
+    assert pymupdf.open(out).page_count == 1
+
+
 def test_build_cover_smaller_dpi_runs(tmp_path, specs, front):
     # Polish diacritics must render without error using the default font.
     out = tmp_path / "cover_pl.pdf"

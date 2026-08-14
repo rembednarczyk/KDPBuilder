@@ -18,6 +18,7 @@ dependencies = [
 dev = ["pytest>=7.0"]
 gen = ["google-genai>=1.0"]
 keywords = ["requests>=2.28"]  # only for the local Amazon autocomplete helper
+logo = ["cairosvg>=2.5"]  # only to rasterize SVG logos for the cover
 
 [project.scripts]
 kdpbuilder = "kdpbuilder.cli:main"
@@ -26,7 +27,7 @@ kdpbuilder = "kdpbuilder.cli:main"
 packages = ["kdpbuilder"]
 
 [tool.setuptools.package-data]
-kdpbuilder = ["data/*.json", "data/fonts/*"]
+kdpbuilder = ["data/*.json", "data/fonts/*", "data/logo/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
