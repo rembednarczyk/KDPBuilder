@@ -172,6 +172,8 @@ def cmd_cover(args) -> int:
             front, out_path=args.out, trim=args.trim, page_count=args.pages, paper=args.paper,
             title=args.title, subtitle=args.subtitle, author=args.author, blurb=args.blurb,
             bg_color=args.bg, text_color=args.text, title_color=args.title_color,
+            title_fill=args.title_fill, title_outline=args.title_outline,
+            banner_color=args.banner, banner_alpha=args.banner_alpha,
             font_title=args.font_title or kcover.DEFAULT_TITLE_FONT,
             font_body=args.font_body or kcover.DEFAULT_BODY_FONT, specs=specs,
         )
@@ -371,8 +373,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--image-size", default="4K", choices=kgenerate.SUPPORTED_SIZES)
     p.add_argument("--model", default=None, help="Model for front art generation.")
     p.add_argument("--bg", default="#FCE7A2", help="Background color (hex).")
-    p.add_argument("--text", default="#213241", help="Text color (hex).")
-    p.add_argument("--title-color", default=None, help="Title color (hex); defaults to text color.")
+    p.add_argument("--text", default="#213241", help="Text color for banner and back (hex).")
+    p.add_argument("--title-color", default=None, help="Deprecated alias for --title-fill.")
+    p.add_argument("--title-fill", default="#FFFFFF", help="Title letter color (hex).")
+    p.add_argument("--title-outline", default="#12303A", help="Title outline color (hex).")
+    p.add_argument("--banner", default="#FFFFFF", help="Subtitle banner color (hex).")
+    p.add_argument("--banner-alpha", type=int, default=210, help="Banner opacity 0-255.")
     p.add_argument("--font-title", default=None, help="TTF path for the title.")
     p.add_argument("--font-body", default=None, help="TTF path for body text.")
     p.set_defaults(func=cmd_cover)

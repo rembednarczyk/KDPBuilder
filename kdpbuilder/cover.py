@@ -76,6 +76,23 @@ def _draw_lines(draw, lines, font, line_h, cx, top, fill, align="center"):
     return y
 
 
+def _draw_lines_outlined(odraw, lines, font, line_h, cx, top, fill, outline, ow, shadow_off):
+    """Centered lines with a thick outline and a soft drop shadow (RGBA overlay).
+
+    This is the niche look: bold letters that pop straight over the art, no
+    white plate behind them.
+    """
+    y = top
+    for line in lines:
+        w = odraw.textlength(line, font=font)
+        x = cx - w / 2
+        odraw.text((x + shadow_off, y + shadow_off), line, font=font,
+                   fill=(0, 0, 0, 110), stroke_width=ow, stroke_fill=(0, 0, 0, 110))
+        odraw.text((x, y), line, font=font, fill=fill, stroke_width=ow, stroke_fill=outline)
+        y += line_h
+    return y
+
+
 def _fill_cover(art: Image.Image, box_w, box_h) -> Image.Image:
     src = art.convert("RGB")
     scale = max(box_w / src.width, box_h / src.height)
@@ -98,6 +115,10 @@ def build_cover(
     bg_color="#FCE7A2",
     text_color="#213241",
     title_color=None,
+    title_fill="#FFFFFF",
+    title_outline="#12303A",
+    banner_color="#FFFFFF",
+    banner_alpha=210,
     dpi: int = 300,
     font_title: str = DEFAULT_TITLE_FONT,
     font_body: str = DEFAULT_BODY_FONT,
@@ -126,30 +147,39 @@ def build_cover(
     fcx = (fx0 + fx1) / 2
     fw = fx1 - fx0
 
-    if title:
-        # Start large (about a fifth of the front width) and shrink to fit.
-        font, lines, lh = _fit_block(draw, title, font_title, fw, px(2.4), int(fw * 0.22))
-        top = px(reg["bleed_in"] + safe)
-        # subtle white plate behind the title for legibility on busy art
-        block_h = len(lines) * lh
-        draw.rectangle([fx0 - px(0.1), top - px(0.1), fx1 + px(0.1), top + block_h + px(0.1)],
-                       fill=(255, 255, 255))
-        _draw_lines(draw, lines, font, lh, fcx, top, tit_col)
-        cursor = top + block_h + px(0.15)
-        if subtitle:
-            sfont, slines, slh = _fit_block(draw, subtitle, font_body, fw, px(1.0), int(fw * 0.09))
-            sblock = len(slines) * slh
-            draw.rectangle([fx0 - px(0.08), cursor - px(0.06), fx1 + px(0.08), cursor + sblock + px(0.06)],
-                           fill=(255, 255, 255))
-            _draw_lines(draw, slines, sfont, slh, fcx, cursor, tcol)
+    # Front text goes on an RGBA overlay so the title outline, drop shadow and
+    # the translucent subtitle banner all composite cleanly over the art.
+    overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    odraw = ImageDraw.Draw(overlay)
+    tit_fill = _hex(title_fill or title_color or "#FFFFFF") + (255,)
+    tit_outline = _hex(title_outline) + (255,)
 
+    if title:
+        # Big outlined title straight on the art, no plate.
+        font, lines, lh = _fit_block(odraw, title, font_title, fw, px(2.6), int(fw * 0.24))
+        ow = max(2, int(font.size * 0.09))
+        soff = max(2, int(font.size * 0.06))
+        _draw_lines_outlined(odraw, lines, font, lh, fcx, px(reg["bleed_in"] + safe),
+                             tit_fill, tit_outline, ow, soff)
+
+    # Subtitle and author on a translucent rounded banner near the bottom.
+    band_lines = []
+    if subtitle:
+        sfont, slines, slh = _fit_block(odraw, subtitle, font_body, fw - px(0.4), px(1.1), int(fw * 0.075))
+        band_lines.append((slines, sfont, slh))
     if author:
-        afont, alines, alh = _fit_block(draw, author, font_body, fw, px(0.8), int(fw * 0.09))
-        ablock = len(alines) * alh
-        atop = H - px(reg["bleed_in"] + safe) - ablock
-        draw.rectangle([fx0 - px(0.08), atop - px(0.06), fx1 + px(0.08), atop + ablock + px(0.06)],
-                       fill=(255, 255, 255))
-        _draw_lines(draw, alines, afont, alh, fcx, atop, tcol)
+        afont, alines, alh = _fit_block(odraw, author, font_body, fw - px(0.4), px(0.7), int(fw * 0.075))
+        band_lines.append((alines, afont, alh))
+    if band_lines:
+        pad = px(0.18)
+        content_h = sum(len(l) * lh2 for l, _, lh2 in band_lines) + (len(band_lines) - 1) * px(0.05)
+        band_bottom = H - px(reg["bleed_in"] + safe)
+        band_top = band_bottom - content_h - 2 * pad
+        odraw.rounded_rectangle([fx0, band_top, fx1, band_bottom], radius=px(0.16),
+                                fill=_hex(banner_color) + (int(banner_alpha),))
+        y = band_top + pad
+        for lines2, font2, lh2 in band_lines:
+            y = _draw_lines(odraw, lines2, font2, lh2, fcx, y, tcol + (255,)) + px(0.05)
 
     # Back cover blurb (upper area; leave the bottom clear for the KDP barcode).
     if blurb:
@@ -178,6 +208,9 @@ def build_cover(
         sy = (H - strip.height) // 2
         canvas.paste(strip, (sx, sy))
         spine_note = "included"
+
+    # Composite the front text overlay (title outline, shadow, banner) over the art.
+    canvas = Image.alpha_composite(canvas.convert("RGBA"), overlay).convert("RGB")
 
     # Save as a single-page PDF at the exact point size.
     out_path = Path(out_path)

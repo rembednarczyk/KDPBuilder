@@ -15,10 +15,13 @@ w `CLAUDE.md`.
 
 ## Zaplanowane
 
-- [ ] **Typografia okładki**: przerobić skład tytułu jak w niszy. Duże,
-  kolorowe, obrysowane litery "bąbelkowe" wprost na scenie, z cieniem i
-  konturem, bez białych plomb pod tekstem. Opcjonalnie półprzezroczysta wstęga
-  pod podtytułem. Cel: dorównać okładkom konkurencji zamiast płaskiego tekstu.
+- [x] **Typografia okładki**: tytuł jako duże litery z grubym konturem i cieniem
+  wprost na grafice (bez białych plomb), podtytuł i autor na półprzezroczystej
+  zaokrąglonej wstędze. Kolory sterowane flagami `--title-fill`,
+  `--title-outline`, `--banner`, `--banner-alpha`.
+- [ ] Opcjonalnie: font display zaokrąglony (Baloo / Fredoka) zamiast
+  DejaVu Bold dla jeszcze bardziej "bąbelkowego" wyglądu; podłączyć przez
+  `--font-title`, bo w systemie nie ma takiego fontu.
 
 ## Backlog
 
