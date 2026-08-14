@@ -1,6 +1,6 @@
 import pytest
 import pymupdf
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from kdpbuilder import cover as kcover
 from kdpbuilder import specs as kspecs
@@ -64,6 +64,22 @@ def test_thin_book_omits_spine_text(tmp_path, specs, front):
         title="Aksolotki", dpi=150, specs=specs,
     )
     assert "omitted" in summary["spine_text"]
+
+
+def test_wraparound_with_thumbnails(tmp_path, specs, front):
+    thumbs = [Image.new("L", (600, 800), 255) for _ in range(6)]
+    for t in thumbs:
+        ImageDraw.Draw(t).ellipse((100, 150, 500, 650), outline=0, width=8)
+    out = tmp_path / "wrap.pdf"
+    summary = kcover.build_cover(
+        front, out, trim="8.5x11", page_count=80, paper="bw_white",
+        title="Aksolotki", subtitle="Kolorowanka dla dzieci", author="Kolorowe Skarby",
+        blurb="Wielka kolorowanka.", thumbnails=thumbs, count_badge="40 wzorow",
+        wrap=True, dpi=120, specs=specs,
+    )
+    assert summary["wrap"] is True
+    assert summary["thumbnails"] == 6
+    assert pymupdf.open(out).page_count == 1
 
 
 def test_build_cover_smaller_dpi_runs(tmp_path, specs, front):
