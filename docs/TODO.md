@@ -22,9 +22,10 @@ w `CLAUDE.md`.
   wprost na grafice (bez białych plomb), podtytuł i autor na półprzezroczystej
   zaokrąglonej wstędze. Kolory sterowane flagami `--title-fill`,
   `--title-outline`, `--banner`, `--banner-alpha`.
-- [ ] Opcjonalnie: font display zaokrąglony (Baloo / Fredoka) zamiast
-  DejaVu Bold dla jeszcze bardziej "bąbelkowego" wyglądu; podłączyć przez
-  `--font-title`, bo w systemie nie ma takiego fontu.
+- [x] Zaokrąglony font display na tytuł okładki: dołączony **Baloo 2 ExtraBold**
+  (OFL, z Google Fonts, statyczna instancja wght=800, pełne polskie znaki) w
+  `kdpbuilder/data/fonts/`. Jest domyślnym fontem tytułu; podtytuł i blurb
+  zostają w DejaVu dla czytelności. Nadpiszesz przez `--font-title`.
 
 ## Backlog
 
