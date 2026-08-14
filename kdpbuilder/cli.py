@@ -167,6 +167,11 @@ def cmd_cover(args) -> int:
         sys.stderr.write("Provide --front IMAGE, or --theme with --generate-front.\n")
         return 2
 
+    thumbs = None
+    if args.thumbs:
+        tdir = Path(args.thumbs)
+        tfiles = sorted(p for p in tdir.iterdir() if p.suffix.lower() in IMAGE_EXTS) if tdir.is_dir() else []
+        thumbs = [Image.open(p) for p in tfiles] or None
     try:
         summary = kcover.build_cover(
             front, out_path=args.out, trim=args.trim, page_count=args.pages, paper=args.paper,
@@ -174,6 +179,8 @@ def cmd_cover(args) -> int:
             bg_color=args.bg, text_color=args.text, title_color=args.title_color,
             title_fill=args.title_fill, title_outline=args.title_outline,
             banner_color=args.banner, banner_alpha=args.banner_alpha,
+            thumbnails=thumbs, count_badge=args.count_badge,
+            wrap=not args.no_wrap, decorations=not args.no_decorations,
             font_title=args.font_title or kcover.DEFAULT_TITLE_FONT,
             font_body=args.font_body or kcover.DEFAULT_BODY_FONT, specs=specs,
         )
@@ -413,6 +420,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--title-outline", default="#12303A", help="Title outline color (hex).")
     p.add_argument("--banner", default="#FFFFFF", help="Subtitle banner color (hex).")
     p.add_argument("--banner-alpha", type=int, default=210, help="Banner opacity 0-255.")
+    p.add_argument("--thumbs", default=None, help="Folder of interior images to show as back-cover thumbnails.")
+    p.add_argument("--count-badge", default=None, help="Text for the front count sticker, e.g. '40 wzorow'.")
+    p.add_argument("--no-wrap", action="store_true", help="Do not extend the art across the back (solid back).")
+    p.add_argument("--no-decorations", action="store_true", help="Skip bubbles and sparkle accents.")
     p.add_argument("--font-title", default=None, help="TTF path for the title.")
     p.add_argument("--font-body", default=None, help="TTF path for body text.")
     p.set_defaults(func=cmd_cover)

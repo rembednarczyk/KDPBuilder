@@ -149,7 +149,14 @@ nie zamiennik; ręczny przegląd stron dalej obowiązuje.
 Moduł `cover` składa okładkę paperback KDP do jednego PDF: tył, grzbiet i przód
 ze spadem. Szerokość grzbietu liczona z liczby stron i grubości papieru
 (`specs`). Grafika przodu jest kolorowa i bez tekstu; tytuł składany jest przez
-moduł, nie wypalany w grafice AI.
+moduł (font Baloo 2), nie wypalany w grafice AI.
+
+Domyślnie okładka jest **wraparound**: tło przodu ciągnie się przez grzbiet na
+tył. Na tyle moduł układa **kolaż miniaturek** wzorów (przechylone karteczki z
+cieniem) z folderu `--thumbs`, dokłada bąbelki i błyski oraz naklejkę
+`--count-badge` (np. „40 wzorów"). Miejsce na kod kreskowy (prawy dół tyłu) jest
+trzymane czyste, a KDP nakłada kod sam. `--no-wrap` daje jednolity tył,
+`--no-decorations` wyłącza bąbelki.
 
 ```bash
 # z gotową grafiką przodu

@@ -4,21 +4,28 @@ Layout, left to right: back cover, spine, front cover, with bleed on all four
 outer edges. Geometry (spine width, full size, panel boundaries) comes from
 kdpbuilder.specs, which reads the shared kdp_specs.json.
 
-The front art is full-color raster (generate it with the cover prompt). Title
-and other text are typeset here, not baked into the AI image, so spelling and
-placement stay under our control.
+The cover is a wraparound: the front art's background is extended across the
+spine and back so the image reads as one continuous piece. The back shows a
+scattered collage of interior-page thumbnails (tilted cards with soft shadows),
+a design-count sticker, floating bubbles and frosted text panels, in a clean
+modern style. Title and other text are typeset here, not baked into the AI
+image, so spelling and placement stay under our control.
 
-Always confirm the final spine width against the KDP cover calculator before
-uploading; paper thickness can change.
+The KDP barcode is added automatically on the back bottom-right; that area is
+kept clear. Always confirm the final spine width against the KDP cover
+calculator before uploading; paper thickness can change.
 """
 
 from __future__ import annotations
 
 import io
+import math
+import random
 from pathlib import Path
 
+import numpy as np
 import pymupdf
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 from . import specs as kspecs
 
@@ -81,11 +88,7 @@ def _draw_lines(draw, lines, font, line_h, cx, top, fill, align="center"):
 
 
 def _draw_lines_outlined(odraw, lines, font, line_h, cx, top, fill, outline, ow, shadow_off):
-    """Centered lines with a thick outline and a soft drop shadow (RGBA overlay).
-
-    This is the niche look: bold letters that pop straight over the art, no
-    white plate behind them.
-    """
+    """Centered lines with a thick outline and a soft drop shadow (RGBA overlay)."""
     y = top
     for line in lines:
         w = odraw.textlength(line, font=font)
@@ -106,6 +109,109 @@ def _fill_cover(art: Image.Image, box_w, box_h) -> Image.Image:
     return new.crop((left, top, left + box_w, top + box_h))
 
 
+# --- wraparound and decoration helpers -----------------------------------
+
+def _extend_bg_left(art_box: Image.Image, width: int, height: int) -> Image.Image:
+    """Continue the art's background leftward by repeating its left-edge color
+    per row, so the water/gradient flows across the spine onto the back."""
+    a = np.asarray(art_box.convert("RGB"))
+    edge = max(1, int(a.shape[1] * 0.03))
+    row = a[:, :edge, :].mean(axis=1).astype("uint8")  # (H, 3) per-row colour
+    # smooth vertically so edge detail (plants) does not print as hard bands
+    col = Image.fromarray(row[:, None, :], "RGB").filter(
+        ImageFilter.GaussianBlur(max(2, a.shape[0] // 110)))
+    row = np.asarray(col)[:, 0, :]
+    strip = Image.fromarray(np.repeat(row[:, None, :], max(1, width), axis=1), "RGB")
+    return strip.resize((max(1, width), height), Image.LANCZOS)
+
+
+def _bubbles(draw, x0, x1, y0, y1, seed, n=26):
+    """Scatter soft translucent bubbles for a light, modern feel."""
+    rng = random.Random(seed)
+    span = max(1, y1 - y0)
+    for _ in range(n):
+        r = rng.randint(int(span * 0.012), int(span * 0.05))
+        x = rng.randint(x0, x1)
+        y = rng.randint(y0, y1)
+        a = rng.randint(16, 46)
+        draw.ellipse([x - r, y - r, x + r, y + r], fill=(255, 255, 255, a))
+        draw.ellipse([x - r, y - r, x + r, y + r], outline=(255, 255, 255, a + 45),
+                     width=max(2, r // 7))
+
+
+def _sparkle(draw, cx, cy, r, color):
+    """A small four-point star accent."""
+    draw.polygon([(cx, cy - r), (cx + r * 0.28, cy - r * 0.28), (cx + r, cy),
+                  (cx + r * 0.28, cy + r * 0.28), (cx, cy + r), (cx - r * 0.28, cy + r * 0.28),
+                  (cx - r, cy), (cx - r * 0.28, cy - r * 0.28)], fill=color)
+
+
+def _thumb_card(thumb: Image.Image, w: int, h: int, pad: int, radius: int) -> Image.Image:
+    """A white rounded card with the interior design inset (RGBA)."""
+    card = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    mask = Image.new("L", (w, h), 0)
+    ImageDraw.Draw(mask).rounded_rectangle([0, 0, w - 1, h - 1], radius=radius, fill=255)
+    ImageDraw.Draw(card).rounded_rectangle([0, 0, w - 1, h - 1], radius=radius, fill=(255, 255, 255, 255))
+    inner = _fill_cover(thumb, w - 2 * pad, h - 2 * pad)
+    imask = Image.new("L", inner.size, 0)
+    ImageDraw.Draw(imask).rounded_rectangle([0, 0, inner.size[0] - 1, inner.size[1] - 1],
+                                            radius=max(2, radius // 2), fill=255)
+    card.paste(inner, (pad, pad), imask)
+    card.putalpha(Image.composite(card.split()[-1], Image.new("L", (w, h), 0), mask))
+    return card
+
+
+def _paste_card(layer: Image.Image, thumb, center, angle, w, h):
+    """Paste a tilted thumbnail card with a soft drop shadow onto an RGBA layer."""
+    pad = max(4, w // 22)
+    radius = max(6, w // 12)
+    card = _thumb_card(thumb, w, h, pad, radius)
+    rot = card.rotate(angle, expand=True, resample=Image.BICUBIC)
+    blur = max(6, w // 14)
+    shadow = Image.new("RGBA", rot.size, (0, 0, 0, 0))
+    shadow.putalpha(rot.split()[-1].point(lambda a: int(a * 0.38)))
+    shadow = shadow.filter(ImageFilter.GaussianBlur(blur))
+    cx, cy = center
+    ox, oy = int(cx - rot.width / 2), int(cy - rot.height / 2)
+    off = max(4, w // 26)
+    layer.alpha_composite(shadow, (ox + off, oy + off))
+    layer.alpha_composite(rot, (ox, oy))
+
+
+def _burst_badge(layer, center, r, text, font_path, fill, outline, text_color):
+    """A starburst sticker with centered text (e.g. the design count)."""
+    size = int(r * 2.4)
+    b = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    d = ImageDraw.Draw(b)
+    cx = cy = size / 2
+    pts = []
+    n = 14
+    for i in range(n * 2):
+        ang = math.pi * i / n
+        rr = r if i % 2 == 0 else r * 0.78
+        pts.append((cx + rr * math.cos(ang), cy + rr * math.sin(ang)))
+    d.polygon(pts, fill=fill, outline=outline)
+    # centered two-line text
+    lines = text.split("\n")
+    fs = int(r * 0.5)
+    font = _font(font_path, fs)
+    lh = font.getbbox("Ag")[3] + int(fs * 0.1)
+    ty = cy - (len(lines) * lh) / 2
+    for ln in lines:
+        w = d.textlength(ln, font=font)
+        d.text((cx - w / 2, ty), ln, font=font, fill=text_color)
+        ty += lh
+    b = b.rotate(-12, expand=True, resample=Image.BICUBIC)
+    layer.alpha_composite(b, (int(center[0] - b.width / 2), int(center[1] - b.height / 2)))
+
+
+def _pick(items, k):
+    if len(items) <= k:
+        return list(items)
+    step = len(items) / k
+    return [items[int(i * step)] for i in range(k)]
+
+
 def build_cover(
     front_art: Image.Image,
     out_path: str | Path,
@@ -123,6 +229,10 @@ def build_cover(
     title_outline="#12303A",
     banner_color="#FFFFFF",
     banner_alpha=210,
+    thumbnails: list | None = None,
+    count_badge: str | None = None,
+    decorations: bool = True,
+    wrap: bool = True,
     dpi: int = 300,
     font_title: str = DEFAULT_TITLE_FONT,
     font_body: str = DEFAULT_BODY_FONT,
@@ -134,95 +244,127 @@ def build_cover(
     safe = kspecs.min_margin_in(specs, bleed=True)
 
     W, H = round(full_w_in * dpi), round(full_h_in * dpi)
-    canvas = Image.new("RGB", (W, H), _hex(bg_color))
-    draw = ImageDraw.Draw(canvas)
+    px = lambda v: round(v * dpi)
     tcol = _hex(text_color)
-    tit_col = _hex(title_color) if title_color else tcol
+    accent = _hex(title_fill or "#FFE14D")
+    accent_outline = _hex(title_outline)
 
-    # Front art fills the front panel plus the outer bleed (right/top/bottom).
-    front_x0_px = round(reg["front_x0"] * dpi)
+    # --- background: hero art on the front, extended across spine + back ---
+    canvas = Image.new("RGB", (W, H), _hex(bg_color))
+    front_x0_px = px(reg["front_x0"])
     art_box = _fill_cover(front_art, W - front_x0_px, H)
     canvas.paste(art_box, (front_x0_px, 0))
+    if wrap and front_x0_px > 0:
+        canvas.paste(_extend_bg_left(art_box, front_x0_px, H), (0, 0))
 
-    px = lambda v: round(v * dpi)
-    # Front text region (inside the front trim, respecting the safe margin).
-    fx0 = px(reg["front_x0"] + safe)
-    fx1 = px(reg["front_x1"] - safe)
+    # layers composited in order: decorations (bubbles), cards, then text
+    deco = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    cards = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    text = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    ddraw = ImageDraw.Draw(deco)
+    tdraw = ImageDraw.Draw(text)
+
+    if decorations:
+        _bubbles(ddraw, 0, W, 0, H, seed=page_count * 100 + len(title), n=30)
+
+    # --- back cover: blurb panel + thumbnail collage + count sticker ---
+    bx0, bx1 = px(reg["back_x0"] + safe), px(reg["spine_x0"] - safe)
+    by0, by1 = px(reg["bleed_in"] + safe), H - px(reg["bleed_in"] + safe)
+    bcx = (bx0 + bx1) / 2
+    bw = bx1 - bx0
+    barcode_w, barcode_h = specs["cover"]["barcode_clear_in"]
+
+    blurb_bottom = by0
+    if blurb:
+        bfont, blines, blh = _fit_block(tdraw, blurb, font_body, bw - px(0.5), px(2.2), int(bw * 0.055))
+        panel_h = len(blines) * blh + px(0.4)
+        tdraw.rounded_rectangle([bx0, by0, bx1, by0 + panel_h], radius=px(0.16),
+                                fill=_hex(banner_color) + (215,))
+        _draw_lines(tdraw, blines, bfont, blh, bcx, by0 + px(0.2), tcol + (255,))
+        blurb_bottom = by0 + panel_h
+
+    if thumbnails:
+        picks = _pick(list(thumbnails), 5)
+        ax0, ax1 = bx0, bx1
+        ay0 = blurb_bottom + px(0.25)
+        ay1 = by1 - px(barcode_h) - px(0.2)  # keep clear of the barcode
+        cw = int((ax1 - ax0) * 0.46)
+        ch = int(cw * 1.28)
+        spots = [(0.27, 0.28, -9), (0.71, 0.24, 8), (0.30, 0.72, -6),
+                 (0.70, 0.70, 9), (0.49, 0.50, -3)]
+        for thumb, (fx, fy, ang) in zip(picks, spots[:len(picks)]):
+            cx = ax0 + fx * (ax1 - ax0)
+            cy = ay0 + fy * (ay1 - ay0)
+            _paste_card(cards, thumb, (cx, cy), ang, cw, ch)
+
+    # --- front cover: title, subtitle/author banner, count sticker ---
+    fx0, fx1 = px(reg["front_x0"] + safe), px(reg["front_x1"] - safe)
     fcx = (fx0 + fx1) / 2
     fw = fx1 - fx0
-
-    # Front text goes on an RGBA overlay so the title outline, drop shadow and
-    # the translucent subtitle banner all composite cleanly over the art.
-    overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    odraw = ImageDraw.Draw(overlay)
     tit_fill = _hex(title_fill or title_color or "#FFFFFF") + (255,)
     tit_outline = _hex(title_outline) + (255,)
 
     if title:
-        # Big outlined title straight on the art, no plate.
-        font, lines, lh = _fit_block(odraw, title, font_title, fw, px(2.6), int(fw * 0.24))
+        font, lines, lh = _fit_block(tdraw, title, font_title, fw, px(2.6), int(fw * 0.24))
         ow = max(2, int(font.size * 0.09))
         soff = max(2, int(font.size * 0.06))
-        _draw_lines_outlined(odraw, lines, font, lh, fcx, px(reg["bleed_in"] + safe),
+        _draw_lines_outlined(tdraw, lines, font, lh, fcx, px(reg["bleed_in"] + safe),
                              tit_fill, tit_outline, ow, soff)
 
-    # Subtitle and author on a translucent rounded banner near the bottom.
     band_lines = []
     if subtitle:
-        sfont, slines, slh = _fit_block(odraw, subtitle, font_body, fw - px(0.4), px(1.1), int(fw * 0.075))
+        sfont, slines, slh = _fit_block(tdraw, subtitle, font_body, fw - px(0.4), px(1.1), int(fw * 0.075))
         band_lines.append((slines, sfont, slh))
     if author:
-        afont, alines, alh = _fit_block(odraw, author, font_body, fw - px(0.4), px(0.7), int(fw * 0.075))
+        afont, alines, alh = _fit_block(tdraw, author, font_body, fw - px(0.4), px(0.7), int(fw * 0.075))
         band_lines.append((alines, afont, alh))
     if band_lines:
         pad = px(0.18)
         content_h = sum(len(l) * lh2 for l, _, lh2 in band_lines) + (len(band_lines) - 1) * px(0.05)
         band_bottom = H - px(reg["bleed_in"] + safe)
         band_top = band_bottom - content_h - 2 * pad
-        odraw.rounded_rectangle([fx0, band_top, fx1, band_bottom], radius=px(0.16),
+        tdraw.rounded_rectangle([fx0, band_top, fx1, band_bottom], radius=px(0.16),
                                 fill=_hex(banner_color) + (int(banner_alpha),))
         y = band_top + pad
         for lines2, font2, lh2 in band_lines:
-            y = _draw_lines(odraw, lines2, font2, lh2, fcx, y, tcol + (255,)) + px(0.05)
+            y = _draw_lines(tdraw, lines2, font2, lh2, fcx, y, tcol + (255,)) + px(0.05)
 
-    # Back cover blurb (upper area; leave the bottom clear for the KDP barcode).
-    if blurb:
-        bx0 = px(reg["back_x0"] + safe)
-        bx1 = px(reg["spine_x0"] - safe)
-        bcx = (bx0 + bx1) / 2
-        bw = bx1 - bx0
-        barcode_h = specs["cover"]["barcode_clear_in"][1]
-        avail_h = H - px(reg["bleed_in"] + safe) * 2 - px(barcode_h)
-        bfont, blines, blh = _fit_block(draw, blurb, font_body, bw, avail_h, int(bw * 0.06))
-        _draw_lines(draw, blines, bfont, blh, bcx, px(reg["bleed_in"] + safe) + px(0.3), tcol, align="center")
+    if count_badge:
+        r = px(0.7)
+        _burst_badge(text, (fx1 - r * 0.6, px(reg["bleed_in"] + safe) + px(2.9)), r,
+                     count_badge, font_title, accent + (255,), accent_outline + (255,), accent_outline + (255,))
+        if decorations:
+            for sx, sy, sr in [(fx0 + px(0.3), px(3.5), px(0.12)), (fx1 - px(0.4), H - px(3.2), px(0.1))]:
+                _sparkle(tdraw, sx, sy, sr, accent + (230,))
 
-    # Spine text, only when the page count allows it.
+    # --- spine text over the wraparound background ---
     spine_note = "omitted (page count below KDP minimum)"
     if kspecs.spine_text_allowed(specs, page_count) and reg["spine_w_in"] > 0.1:
         spine_txt = title if not author else "%s  -  %s" % (title, author)
         s_safe = specs["cover"]["spine_text_safe_in"]
         s_w_px = px(reg["spine_w_in"] - 2 * s_safe)
         s_h_px = px(full_h_in - 2 * (reg["bleed_in"] + safe))
-        strip = Image.new("RGB", (max(1, s_h_px), max(1, s_w_px)), _hex(bg_color))
+        strip = Image.new("RGBA", (max(1, s_h_px), max(1, s_w_px)), (0, 0, 0, 0))
         sdraw = ImageDraw.Draw(strip)
         sfont, slines, slh = _fit_block(sdraw, spine_txt, font_title, s_h_px, s_w_px, int(s_w_px * 0.7))
-        _draw_lines(sdraw, slines, sfont, slh, s_h_px / 2, (s_w_px - len(slines) * slh) / 2, tcol)
+        _draw_lines(sdraw, slines, sfont, slh, s_h_px / 2, (s_w_px - len(slines) * slh) / 2,
+                    _hex("#FFFFFF") + (255,))
         strip = strip.rotate(90, expand=True)
         sx = px(reg["spine_x0"]) + (px(reg["spine_w_in"]) - strip.width) // 2
-        sy = (H - strip.height) // 2
-        canvas.paste(strip, (sx, sy))
+        text.alpha_composite(strip, (sx, (H - strip.height) // 2))
         spine_note = "included"
 
-    # Composite the front text overlay (title outline, shadow, banner) over the art.
-    canvas = Image.alpha_composite(canvas.convert("RGBA"), overlay).convert("RGB")
+    # --- compose all layers and save as a single-page PDF ---
+    out = Image.alpha_composite(canvas.convert("RGBA"), deco)
+    out = Image.alpha_composite(out, cards)
+    out = Image.alpha_composite(out, text).convert("RGB")
 
-    # Save as a single-page PDF at the exact point size.
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     doc = pymupdf.open()
     page = doc.new_page(width=full_w_in * 72.0, height=full_h_in * 72.0)
     buf = io.BytesIO()
-    canvas.save(buf, format="PNG")
+    out.save(buf, format="PNG")
     page.insert_image(pymupdf.Rect(0, 0, full_w_in * 72.0, full_h_in * 72.0), stream=buf.getvalue())
     doc.save(str(out_path), garbage=4, deflate=True)
     doc.close()
@@ -236,4 +378,6 @@ def build_cover(
         "full_cover_in": [round(full_w_in, 3), round(full_h_in, 3)],
         "dpi": dpi,
         "spine_text": spine_note,
+        "wrap": bool(wrap),
+        "thumbnails": len(thumbnails) if thumbnails else 0,
     }
