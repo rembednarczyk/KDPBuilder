@@ -58,9 +58,10 @@ wyszukiwania, więc nie tłumacz fraz jeden do jednego.
   krawędzi, ignoruje antyaliasing), grubość linii przez transformatę odległości
   (min 0,75 pkt), drobne artefakty (spójne komponenty), tusz w marginesie.
   Stack: PyMuPDF + numpy + scipy. Sprawdzony na realnym wnętrzu: PASS.
-- [ ] Zamknięte kontury: obecnie tylko słaby proxy (liczba zamkniętych obszarów).
-  Do dopracowania: pewniejsze wykrywanie nieszczelności konturów, walidacja na
-  przykładach z celowymi przerwami.
+- [x] Zamknięte kontury: realna kontrola słabych zamknięć (erozja czerni o 1 px
+  ujawnia cienkie/przerwane ściany, które puszczają kolor). Sprawdzona na
+  przykładach z celowo cienką ścianą (WARN) i szczelnym boxem (PASS), oraz na
+  realnym wnętrzu (PASS). Pełne przerwy konturu dalej wymagają oka.
 
 ### Pipeline i jakość
 
@@ -68,8 +69,8 @@ wyszukiwania, więc nie tłumacz fraz jeden do jednego.
   (obecnie symetryczny margines bezpieczny).
 - [ ] Wariant formatu 8.5x8.5 (kwadrat sprzedaje się dobrze, wyróżnia na
   miniaturce).
-- [ ] Wpięcie walidatora jako krok build w CI (`--json --strict`, parsowanie
-  raportu).
+- [x] CI: `.github/workflows/ci.yml` uruchamia pytest na push do main i na PR
+  (testy pokrywają walidator, skaner i pipeline).
 - [ ] Więcej tematów w bibliotece promptów poza aksolotkiem.
 
 ## Zrobione

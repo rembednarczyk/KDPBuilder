@@ -136,12 +136,27 @@ def _scan_page(gray, dpi, index, min_line_pt, margin_in, gray_tol=0.004, speck_i
     ink_in_band = int(np.count_nonzero(ink & band))
     band_ink_frac = ink_in_band / max(1, int(np.count_nonzero(ink)))
 
-    # enclosed white regions (weak closed-contour proxy)
+    # enclosed white regions, and weak seals: an enclosed region whose wall is so
+    # thin (1-2 px) that eroding the black by 1 px lets it leak to the outside.
+    # Bold outlines survive; a broken or near-broken contour opens up.
     paper = ~ink
     plbl, pn = ndimage.label(paper)
     border_labels = set(plbl[0, :]) | set(plbl[-1, :]) | set(plbl[:, 0]) | set(plbl[:, -1])
     border_labels.discard(0)
     enclosed = int(pn - len(border_labels))
+
+    weak_seals = 0
+    weak_area_frac = 0.0
+    if enclosed > 0 and ink.any():
+        enclosed_mask = paper & ~np.isin(plbl, list(border_labels))
+        paper_e = ~ndimage.binary_erosion(ink, iterations=1)
+        plbl2, _ = ndimage.label(paper_e)
+        border2 = set(plbl2[0, :]) | set(plbl2[-1, :]) | set(plbl2[:, 0]) | set(plbl2[:, -1])
+        border2.discard(0)
+        leaked = enclosed_mask & np.isin(plbl2, list(border2))
+        if leaked.any():
+            _, weak_seals = ndimage.label(leaked)
+            weak_area_frac = float(leaked.sum()) / max(1, int(enclosed_mask.sum()))
 
     return {
         "page": index,
@@ -154,6 +169,8 @@ def _scan_page(gray, dpi, index, min_line_pt, margin_in, gray_tol=0.004, speck_i
         "specks": specks,
         "band_ink_frac": round(band_ink_frac, 4),
         "enclosed_regions": enclosed,
+        "weak_seals": int(weak_seals),
+        "weak_area_frac": round(weak_area_frac, 4),
     }
 
 
@@ -222,11 +239,15 @@ def scan_pdf(path, trim, paper="bw_white", bleed=False, render_dpi=200,
         "Pages with the most solid ink (review for filled-blob artifacts; note kawaii eyes also count).",
         {"top_pages": worst_solid})
 
-    open_pages = [p["page"] for p in pages if p.get("enclosed_regions", 0) == 0
-                  and (p["line_widths_pt"] is not None)]
-    add("closed_contours", INFO,
-        "Enclosed white regions counted per page (weak proxy). %d page(s) show none." % len(open_pages),
-        {"experimental": True, "pages_without_enclosed_regions": open_pages[:15]})
+    weak = [{"page": p["page"], "weak_seals": p["weak_seals"], "weak_area_frac": p["weak_area_frac"]}
+            for p in pages if p.get("weak_seals", 0) > 0 and p.get("weak_area_frac", 0) > 0.02]
+    if weak:
+        add("closed_contours", WARN,
+            "%d page(s) have thin or broken contour walls that would leak color." % len(weak),
+            {"pages": weak[:15]})
+    else:
+        add("closed_contours", PASS,
+            "Contours look sealed (no enclosed region leaks after a 1 px erosion).")
 
     worst = max((_SEV[c["status"]] for c in checks), default=0)
     result = FAIL if worst >= 2 else (WARN if worst >= 1 else PASS)
@@ -245,4 +266,4 @@ def print_report(report):
         print("[%s] %-16s %s" % (tag[c["status"]], c["check"], c["message"]))
     print("-" * 60)
     print("RESULT: %s" % report["result"])
-    print("Note: closed-contour check is experimental; still review pages by hand.")
+    print("Note: the scan is an aid; still review pages by hand before publishing.")

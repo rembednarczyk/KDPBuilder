@@ -72,6 +72,34 @@ def test_specks_flagged(tmp_path):
     assert _status(report, "stray_marks") == "WARN"
 
 
+def _status_of(report, check):
+    return next(c["status"] for c in report["checks"] if c["check"] == check)
+
+
+def test_closed_box_passes_contours(tmp_path):
+    img = _blank()
+    d = ImageDraw.Draw(img)
+    d.rectangle((700, 900, 1800, 2200), outline=(0, 0, 0), width=16)  # thick, sealed
+    pdf = _make_pdf(tmp_path, img)
+    report = kscan.scan_pdf(pdf, trim="8.5x11")
+    assert _status_of(report, "closed_contours") == "PASS"
+
+
+def test_thin_wall_flagged_as_leak(tmp_path):
+    img = _blank()
+    d = ImageDraw.Draw(img)
+    # three thick walls, one very thin wall: the interior is enclosed but the
+    # thin wall is a weak seal that opens under a 1 px erosion.
+    x0, y0, x1, y1 = 700, 900, 1800, 2200
+    d.line((x0, y0, x1, y0), fill=(0, 0, 0), width=16)  # top
+    d.line((x0, y0, x0, y1), fill=(0, 0, 0), width=16)  # left
+    d.line((x1, y0, x1, y1), fill=(0, 0, 0), width=16)  # right
+    d.line((x0, y1, x1, y1), fill=(0, 0, 0), width=1)   # bottom, thin
+    pdf = _make_pdf(tmp_path, img)
+    report = kscan.scan_pdf(pdf, trim="8.5x11")
+    assert _status_of(report, "closed_contours") == "WARN"
+
+
 def test_report_structure(tmp_path):
     img = _blank()
     ImageDraw.Draw(img).ellipse((700, 900, 1800, 2200), outline=(0, 0, 0), width=14)
