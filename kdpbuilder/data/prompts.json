@@ -316,6 +316,46 @@
     "note": "For one book, keep theme, age group and style fixed and vary only the scene. Reuse the same image-model seed or style reference across pages so the character of the line stays constant (workflow step 2). Generate a few pages first, confirm one consistent look, then generate the rest."
   },
 
+  "decoration_assets": {
+    "note": "Prompts for decorative backing shapes for the cover text slots (banners, ribbons, frames). The asset carries no text; the cover module composites the Polish text on top. Generate on a plain solid white background so it can be keyed out to transparency, and keep the middle clear so text stays readable.",
+    "core": [
+      "decorative banner shape",
+      "children's book style",
+      "cute and friendly",
+      "soft rounded forms",
+      "vibrant cheerful colors",
+      "smooth clean shapes",
+      "bold clean edges",
+      "soft drop shadow under the shape",
+      "one banner centered",
+      "wide horizontal format",
+      "empty clear middle area for a title",
+      "plain solid white background",
+      "no text",
+      "high quality, crisp"
+    ],
+    "negative": [
+      "text", "letters", "words", "captions", "watermark", "signature",
+      "photo", "photorealistic", "realistic texture", "busy pattern in the center",
+      "clutter in the middle", "dark background", "colored background",
+      "gradient background", "transparent checkerboard", "frame around the whole image"
+    ],
+    "variants": [
+      {"key": "ribbon_wave", "subject": "a wavy ribbon banner with folded ends, ocean blue and teal"},
+      {"key": "bubble_banner", "subject": "a plaque made of soft round bubbles clustered together, aqua and white"},
+      {"key": "seaweed_frame", "subject": "a horizontal banner framed with cute green seaweed and tiny shells"},
+      {"key": "treasure_scroll", "subject": "an old treasure map scroll banner, warm parchment with rolled ends"},
+      {"key": "shell_banner", "subject": "a banner shaped like a scalloped seashell, soft pink and cream"},
+      {"key": "coral_frame", "subject": "a banner bordered by colorful coral and a little starfish"},
+      {"key": "gem_banner", "subject": "a banner decorated with colorful gemstones and sparkles, gold trim"},
+      {"key": "treasure_chest_banner", "subject": "a banner rising from an open treasure chest with a few gems, gold accents"},
+      {"key": "rainbow_ribbon", "subject": "a cheerful rounded rainbow ribbon banner"},
+      {"key": "star_banner", "subject": "a rounded banner with cute stars and sparkles along the edges"},
+      {"key": "wave_foam", "subject": "a banner shaped like a cresting wave with white foam edges"},
+      {"key": "cloud_banner", "subject": "a soft fluffy cloud shaped banner, pastel blue and white"}
+    ]
+  },
+
   "cover_style": {
     "positive": [
       "full color children's book cover illustration",
