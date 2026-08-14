@@ -35,6 +35,24 @@ wnętrze i okładkę, walidowane pod KDP.
   (wymiary, spad, DPI, marginesy, limity stron, dane okładki). Nie powielaj
   specyfikacji w kodzie; czytaj je przez `kdpbuilder.specs`.
 - Biblioteka promptów: `kdpbuilder/data/prompts.json`.
+- Spec książki: `books/<slug>.json`. Jedno źródło prawdy dla danego tytułu
+  (tytuł, podtytuł, autor, blurb, kolory, format, liczba stron). Okładkę składa
+  się przez `cover --book books/<slug>.json`; jawne flagi wciąż wygrywają ze
+  specem. Kanoniczny tytuł/podtytuł/autor mieszkają tutaj, nie w kodzie.
+
+## Warstwa tekstu vs warstwa obrazu (decyzja)
+
+Dwie osobne warstwy, nie mieszaj ich źródeł:
+
+- **Warstwa tekstu** (tytuł, podtytuł, blurb, 7 tagów, opis sprzedażowy):
+  zasilana wiedzą SEO i keywords. Kanoniczny tekst tytułu w `books/<slug>.json`,
+  research w `docs/seo_*`. Tekst na okładce **zawsze składa skrypt** (poprawna
+  polska pisownia, diakrytyki), nigdy nie jest wypalany w obraz przez AI.
+- **Warstwa obrazu** (grafika przodu, miniaturki, dekoracje pod sloty):
+  zasilana **tematem i stylem**, nie słowami kluczowymi. SEO to tekst
+  wyszukiwania, nie wygląd, więc w promptach obrazowych byłby szumem. Sloty
+  wizualne (podtytuł, blurb) mają **własne, oddzielne prompty** dekoracji z
+  `prompts.json` (`decoration_assets`). To wystarczy, keywords ich nie zasilają.
 
 ## Komendy
 

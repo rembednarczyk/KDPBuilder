@@ -145,6 +145,25 @@ def cmd_generate(args) -> int:
 def cmd_cover(args) -> int:
     from PIL import Image
 
+    # A book spec (books/*.json) is the single source of truth for this title:
+    # it fills the cover text, colors and build params. Explicit flags still win.
+    if args.book:
+        spec = json.loads(Path(args.book).read_text(encoding="utf-8"))
+        cov = spec.get("cover", {})
+        args.trim = args.trim or spec.get("trim")
+        args.paper = args.paper if args.paper != "bw_white" else spec.get("paper", "bw_white")
+        if args.pages is None:
+            args.pages = spec.get("pages") or (spec.get("designs", 0) * 2 or None)
+        # The spec is authoritative for cover content; edit the spec to change it.
+        for k, v in cov.items():
+            if hasattr(args, k):
+                setattr(args, k, v)
+            else:
+                sys.stderr.write("Warning: unknown cover key '%s' in %s (ignored).\n" % (k, args.book))
+    if not args.trim or not args.pages:
+        sys.stderr.write("Provide --trim and --pages, or --book that has them.\n")
+        return 2
+
     specs = kspecs.load_specs()
     if args.front:
         front = Image.open(args.front)
@@ -448,8 +467,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("cover", help="Build a full-wrap KDP paperback cover PDF.")
     p.add_argument("--out", required=True, help="Output cover PDF path.")
-    p.add_argument("--trim", required=True, help="Trim key, e.g. 8.5x11.")
-    p.add_argument("--pages", type=int, required=True, help="Final interior page count (sets spine width).")
+    p.add_argument("--book", default=None, help="Book spec JSON (books/*.json); fills title, colors, trim, pages.")
+    p.add_argument("--trim", default=None, help="Trim key, e.g. 8.5x11 (or from --book).")
+    p.add_argument("--pages", type=int, default=None, help="Interior page count, sets spine width (or from --book).")
     p.add_argument("--paper", default="bw_white")
     p.add_argument("--title", default="", help="Cover title.")
     p.add_argument("--subtitle", default=None)

@@ -11,6 +11,8 @@ indeksu. Pamięć projektu i reguły są w `../CLAUDE.md`.
   aksolotkami: tytuł, podtytuł, 7 tagów, opis, kategorie, ryzyka.
 - [seo_axolotl_en.md](seo_axolotl_en.md) pakiet SEO pod Amazon.com (EN):
   tytuł, podtytuł, 7 tagów, opis, kategorie.
+- [cover_slots.svg](cover_slots.svg) mapa okładki: które obszary składa skrypt,
+  które są slotami pod dekoracje z AI, gdzie idzie logo i strefa kodu kreskowego.
 
 Narzędzie: `python -m kdpbuilder.cli keywords <pliki> --contains niche` wyciąga
 kandydackie frazy z częstością z zapisanych aukcji konkurencji. Przydatne flagi:
