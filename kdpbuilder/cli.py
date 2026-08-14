@@ -330,8 +330,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--season", help="Season for the seasonal style.")
     p.add_argument("--trim", help="Trim key; sets the aspect ratio to match, e.g. 8.5x11.")
     p.add_argument("--aspect", help="Override aspect ratio (1:1, 3:4, 2:3, ...).")
-    p.add_argument("--image-size", default="4K", choices=kgenerate.SUPPORTED_SIZES)
-    p.add_argument("--model", default=None, help="Model id (default Nano Banana Pro or GEMINI_IMAGE_MODEL).")
+    p.add_argument("--image-size", default="2K", choices=kgenerate.SUPPORTED_SIZES,
+                   help="2K is enough for interiors (pipeline upscales to a 300 DPI page) and about half the cost of 4K.")
+    p.add_argument("--model", default=None, help="Model id (default NB2 gemini-3.1-flash-image or GEMINI_IMAGE_MODEL).")
     p.add_argument("--sleep", type=float, default=0.0, help="Seconds to wait between images.")
     p.add_argument("--retries", type=int, default=3)
     p.add_argument("--limit", type=int, default=None, help="Only generate the first N prompts.")

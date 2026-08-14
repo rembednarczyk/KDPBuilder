@@ -10,7 +10,7 @@ def lib():
 
 def test_library_loads(lib):
     assert "axolotl" in prompts.list_themes(lib)
-    assert set(prompts.list_age_groups(lib)) == {"3-4", "5-6", "6-7"}
+    assert set(prompts.list_age_groups(lib)) == {"3-4", "4-8", "5-6", "6-7"}
     assert "kawaii" in prompts.list_styles(lib)
 
 
