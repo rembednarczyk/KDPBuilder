@@ -22,5 +22,8 @@ kdpbuilder = "kdpbuilder.cli:main"
 [tool.setuptools]
 packages = ["kdpbuilder"]
 
+[tool.setuptools.package-data]
+kdpbuilder = ["data/*.json"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

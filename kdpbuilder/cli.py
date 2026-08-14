@@ -43,12 +43,68 @@ def _validator_path() -> Path:
 
 
 def cmd_prompt(args) -> int:
-    pair = prompts.build_pair(args.subject, extra=args.extra)
+    lib = prompts.load_prompt_lib()
+    if args.theme:
+        subject = prompts.compose_subject(args.theme, args.scene, lib)
+    elif args.subject:
+        subject = args.subject
+    else:
+        sys.stderr.write("Provide a subject or --theme.\n")
+        return 2
+    try:
+        pair = prompts.build_pair(
+            subject, age=args.age, style=args.style, season=args.season, extra=args.extra, lib=lib
+        )
+    except prompts.PromptError as e:
+        sys.stderr.write(str(e) + "\n")
+        return 2
     if args.json:
         print(json.dumps(pair, indent=2, ensure_ascii=False))
     else:
         print("PROMPT:\n" + pair["prompt"])
         print("\nNEGATIVE:\n" + pair["negative_prompt"])
+    return 0
+
+
+def cmd_book_prompts(args) -> int:
+    lib = prompts.load_prompt_lib()
+    try:
+        pages = prompts.build_book(
+            theme=args.theme, age=args.age, style=args.style,
+            count=args.count, season=args.season, extra=args.extra, lib=lib,
+        )
+    except prompts.PromptError as e:
+        sys.stderr.write(str(e) + "\n")
+        return 2
+    if args.format == "csv":
+        import csv
+        import io
+
+        buf = io.StringIO()
+        w = csv.writer(buf)
+        w.writerow(["page", "scene", "prompt", "negative_prompt"])
+        for p in pages:
+            w.writerow([p["page"], p["scene"], p["prompt"], p["negative_prompt"]])
+        text = buf.getvalue()
+    else:
+        text = json.dumps(pages, indent=2, ensure_ascii=False)
+    if args.out:
+        Path(args.out).write_text(text, encoding="utf-8")
+        print("Wrote %d prompt(s) to %s" % (len(pages), args.out))
+    else:
+        print(text)
+    return 0
+
+
+def cmd_catalog(args) -> int:
+    lib = prompts.load_prompt_lib()
+    out = {
+        "themes": prompts.list_themes(lib),
+        "age_groups": {k: v["label"] for k, v in lib["age_groups"].items()},
+        "styles": {k: v["label"] for k, v in lib["styles"].items()},
+        "seasons": list(lib["styles"]["seasonal"].get("seasons", {})),
+    }
+    print(json.dumps(out, indent=2, ensure_ascii=False))
     return 0
 
 
@@ -155,11 +211,30 @@ def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(prog="kdpbuilder", description="Coloring-book pipeline for Amazon KDP.")
     sub = ap.add_subparsers(dest="command", required=True)
 
-    p = sub.add_parser("prompt", help="Build a line-art prompt for one subject.")
-    p.add_argument("subject")
+    p = sub.add_parser("prompt", help="Build a line-art prompt for one design.")
+    p.add_argument("subject", nargs="?", default=None, help="Free subject text (or use --theme).")
+    p.add_argument("--theme", help="Theme key from the library, e.g. axolotl.")
+    p.add_argument("--scene", help="Scene text to append to the theme subject.")
+    p.add_argument("--age", help="Age group: 3-4, 5-6, 6-7.")
+    p.add_argument("--style", help="Style: kawaii, cozy, seasonal, ...")
+    p.add_argument("--season", help="Season for the seasonal style.")
     p.add_argument("--extra", nargs="*", default=None, help="Extra positive terms.")
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_prompt)
+
+    p = sub.add_parser("book-prompts", help="Build prompts for a whole book (one per page).")
+    p.add_argument("--theme", required=True, help="Theme key, e.g. axolotl.")
+    p.add_argument("--age", required=True, help="Age group: 3-4, 5-6, 6-7.")
+    p.add_argument("--style", required=True, help="Style: kawaii, cozy, seasonal, ...")
+    p.add_argument("--count", type=int, default=40, help="Number of designs (default 40).")
+    p.add_argument("--season", help="Season for the seasonal style.")
+    p.add_argument("--extra", nargs="*", default=None, help="Extra positive terms.")
+    p.add_argument("--format", choices=["json", "csv"], default="json")
+    p.add_argument("--out", help="Write to this file instead of stdout.")
+    p.set_defaults(func=cmd_book_prompts)
+
+    p = sub.add_parser("catalog", help="List available themes, age groups, styles and seasons.")
+    p.set_defaults(func=cmd_catalog)
 
     p = sub.add_parser("prep", help="Clean raw images to pure black-and-white line art.")
     p.add_argument("in_dir")

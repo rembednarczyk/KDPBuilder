@@ -39,13 +39,37 @@ pip install -e .
 
 ### 1. Prompt pod grafikę liniową
 
+Prompty składane są z biblioteki `kdpbuilder/data/prompts.json` (jedno źródło
+prawdy dla treści promptów): temat, grupa wieku i stylistyka. Zobacz co jest
+dostępne:
+
 ```bash
-python -m kdpbuilder.cli prompt "friendly cat" --json
+python -m kdpbuilder.cli catalog
 ```
 
-Zwraca prompt pozytywny i negatywny w stylu bold and easy (line art, grube
-kontury, bez cieni i gradientów, biale tlo, jeden wzor wycentrowany). Grafikę
-generujesz swoim narzędziem AI. Krok 2 (ocena spójności stylu) robisz ręcznie.
+Grupy wieku: `3-4`, `5-6`, `6-7` (rosnąca złożoność i cieńsza kreska z wiekiem).
+Stylistyki: `kawaii`, `cozy`, `fantasy_costume`, `seasonal`, `habitat_scene`,
+`realistic_simple`, `patterned`. Sezony dla `seasonal`: christmas, halloween,
+easter, birthday, valentine.
+
+Pojedynczy prompt (temat + scena + wiek + styl):
+
+```bash
+python -m kdpbuilder.cli prompt --theme axolotl --scene "sitting inside a teacup" \
+  --age 3-4 --style kawaii
+```
+
+Prompty na całą książkę, jeden na stronę (styl stały, scena zmienna, co trzyma
+spójność kreski z kroku 2):
+
+```bash
+python -m kdpbuilder.cli book-prompts --theme axolotl --age 5-6 --style kawaii \
+  --count 40 --format csv --out prompts.csv
+```
+
+Zwraca prompt pozytywny i negatywny w stylu bold and easy. Grafikę generujesz
+swoim narzędziem AI. Dla spójności użyj tego samego seeda lub referencji stylu na
+wszystkich stronach: wygeneruj kilka, potwierdź jeden wygląd, dopiero potem resztę.
 
 ### 3-4. Czyszczenie do czystego B&W
 
