@@ -80,11 +80,10 @@ def _pil_gray(data: bytes) -> np.ndarray:
     return np.asarray(img.convert("L"), dtype=np.uint8)
 
 
-def _line_widths_pt(ink: np.ndarray, dpi: float):
+def _line_widths_pt(dt: np.ndarray, dpi: float):
     """Stroke widths in points along line centerlines, via distance transform."""
-    if ink.sum() == 0:
+    if dt.max() == 0:
         return None
-    dt = ndimage.distance_transform_edt(ink)
     ridge = (ndimage.maximum_filter(dt, size=3) == dt) & (dt > 0)
     half = dt[ridge]
     if half.size == 0:
@@ -111,7 +110,15 @@ def _scan_page(gray, dpi, index, min_line_pt, margin_in, gray_tol=0.004, speck_i
     gray_frac = interior_gray / total
     edge_gray_frac = int(np.count_nonzero(gray_mask & edge_zone)) / total
 
-    widths = _line_widths_pt(ink, dpi)
+    dt = ndimage.distance_transform_edt(ink) if ink.any() else np.zeros_like(gray, dtype=float)
+    widths = _line_widths_pt(dt, dpi)
+
+    # Solid fills: ink deep inside a region thicker than a normal outline. Bold
+    # line art should have almost none; a filled blob (a bubble gone solid) or an
+    # intended solid (kawaii eyes) both show here, so this flags spots to review.
+    solid_half_px = 0.03 * dpi  # regions thicker than ~0.06 inch
+    ink_px = max(1, int(ink.sum()))
+    solid_frac = int(np.count_nonzero(dt > solid_half_px)) / ink_px
 
     # stray specks: tiny isolated ink components
     speck_area = max(1, int((speck_in * dpi) ** 2))
@@ -142,6 +149,7 @@ def _scan_page(gray, dpi, index, min_line_pt, margin_in, gray_tol=0.004, speck_i
         "dpi": round(dpi, 1),
         "gray_frac": round(gray_frac, 5),
         "edge_gray_frac": round(edge_gray_frac, 5),
+        "solid_frac": round(solid_frac, 4),
         "line_widths_pt": widths,
         "specks": specks,
         "band_ink_frac": round(band_ink_frac, 4),
@@ -204,6 +212,15 @@ def scan_pdf(path, trim, paper="bw_white", bleed=False, render_dpi=200,
             {"pages": heavy_margin[:15]})
     else:
         add("safe_margin", PASS, "Little ink inside the outer margin.")
+
+    # Solid-fill hint: cannot tell an artifact blob from intended kawaii eyes,
+    # so this only points a human at the pages with the most solid ink.
+    ranked = sorted((p for p in pages if p["line_widths_pt"]),
+                    key=lambda p: p.get("solid_frac", 0), reverse=True)
+    worst_solid = [{"page": p["page"], "solid_frac": p["solid_frac"]} for p in ranked[:5]]
+    add("solid_fill", INFO,
+        "Pages with the most solid ink (review for filled-blob artifacts; note kawaii eyes also count).",
+        {"top_pages": worst_solid})
 
     open_pages = [p["page"] for p in pages if p.get("enclosed_regions", 0) == 0
                   and (p["line_widths_pt"] is not None)]
