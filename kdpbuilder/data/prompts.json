@@ -83,6 +83,20 @@
       "recommended_styles": ["kawaii", "fantasy_costume", "seasonal"],
       "designs_default": 30
     },
+    "4-8": {
+      "label": "Szeroki zakres wieku (metadane 4-8)",
+      "positive": [
+        "bold clean outlines",
+        "one main subject with a small scene around it",
+        "a few background elements like water plants, bubbles and a small companion",
+        "clear medium sized areas to color",
+        "gentle decorative details",
+        "balanced composition, not too sparse"
+      ],
+      "negative": ["overly empty page", "too few elements", "tiny intricate details", "photorealistic complexity"],
+      "recommended_styles": ["kawaii", "cozy", "fantasy_costume", "habitat_scene", "seasonal"],
+      "designs_default": 40
+    },
     "5-6": {
       "label": "Przedszkole starsze / zerówka",
       "positive": [
