@@ -1,0 +1,25 @@
+{
+  "slug": "axolotl_5-6",
+  "note": "Book spec: one source of truth for this title's cover text and build parameters. Cover reads it via `cover --book`. Keyword research and the sales description rationale live in docs/seo_axolotl_pl.md and docs/seo_axolotl_en.md; the canonical title/subtitle/author are here.",
+  "theme": "axolotl",
+  "age": "5-6",
+  "style": "kawaii",
+  "designs": 40,
+  "trim": "8.5x11",
+  "paper": "bw_white",
+  "cover": {
+    "title": "Aksolotki",
+    "subtitle": "Kolorowanka dla dzieci 4-8 lat",
+    "author": "Kolorowe Skarby",
+    "blurb": "Urocze aksolotki do kolorowania. Grube kontury i duże pola, idealne dla małych dłoni. Każdy wzór na osobnej stronie, z pustą stroną z tyłu, żeby mazaki nie przebijały.",
+    "count_badge": "40 wzorów",
+    "bg": "#0E6E8C",
+    "text": "#0E3A44",
+    "title_grad_top": "#FFE86B",
+    "title_grad_bottom": "#FF9A2E",
+    "title_outline": "#0B2A66",
+    "banner_style": "scallop",
+    "banner": "#FF5FA6",
+    "banner_border": "#C81E78"
+  }
+}
