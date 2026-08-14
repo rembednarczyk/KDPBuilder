@@ -238,6 +238,23 @@ def cmd_assemble(args) -> int:
     return 0
 
 
+def cmd_scan(args) -> int:
+    from . import scan as kscan
+
+    report = kscan.scan_pdf(
+        args.pdf, trim=args.trim, paper=args.paper, bleed=args.bleed,
+        render_dpi=args.render_dpi, min_line_pt=args.min_line_pt,
+    )
+    if args.json:
+        out = dict(report)
+        if not args.page_data:
+            out.pop("page_data", None)
+        print(json.dumps(out, indent=2, ensure_ascii=False))
+    else:
+        kscan.print_report(report)
+    return 0 if report["result"] != "FAIL" else 1
+
+
 def cmd_validate(args) -> int:
     script = _validator_path()
     if not script.exists():
@@ -388,6 +405,17 @@ def build_parser() -> argparse.ArgumentParser:
             p.set_defaults(func=cmd_build)
         else:
             p.set_defaults(func=cmd_assemble)
+
+    p = sub.add_parser("scan", help="Pixel-level scan (purity, line weight, specks, margins).")
+    p.add_argument("pdf")
+    p.add_argument("--trim", required=True)
+    p.add_argument("--paper", default="bw_white")
+    p.add_argument("--bleed", action="store_true")
+    p.add_argument("--render-dpi", type=int, default=200, help="Render DPI for vector pages.")
+    p.add_argument("--min-line-pt", type=float, default=None, help="Minimum line weight in points.")
+    p.add_argument("--json", action="store_true")
+    p.add_argument("--page-data", action="store_true", help="Include per-page data in JSON.")
+    p.set_defaults(func=cmd_scan)
 
     p = sub.add_parser("validate", help="Run the kdp-compliance validator.")
     p.add_argument("pdf")
