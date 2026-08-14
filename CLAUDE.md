@@ -21,10 +21,10 @@ wnętrze i okładkę, walidowane pod KDP.
 - Domyślny model obrazowy: **Nano Banana 2** (`gemini-3.1-flash-image`). Pro
   (`gemini-3-pro-image`) tylko gdy potrzebna najwyższa jakość, np. złożona
   okładka.
-- **Przyszły format: książeczki 58-stronicowe** (29 wzorów przy druku
-  jednostronnym). Uwaga: 58 < 79 stron, więc KDP nie pozwala na tekst na
-  grzbiecie. Moduł okładki sam go pomija (`spine_text_allowed`). Grzbiet dla 58
-  stron na białym papierze to ok. 0,13 cala, i tak potwierdź w kalkulatorze KDP.
+- **Format standardowy: 40 wzorów = 80 stron** (druk jednostronny, każdy wzór z
+  pustą stroną z tyłu). Przy 80 stronach KDP pozwala na tekst na grzbiecie
+  (min 79). Pamiętaj, że przy druku jednostronnym liczba stron to dwa razy
+  liczba wzorów.
 
 ## Architektura
 
@@ -53,6 +53,10 @@ python -m pytest
 - Bez znaków towarowych, marek, nazw gier (w tym nie używaj słowa oznaczającego
   popularną grę kojarzoną z aksolotkami), celebrytów.
 - Przy publikacji zaznacz "Yes, AI-Generated" dla obrazów.
+- **Bez tekstu w grafikach.** Kolorowanka to sam line art, negatyw wymusza brak
+  napisów. Jeśli model mimo to wstawi jakiś napis (zdarzało się np. "Story"),
+  musi być po polsku, nigdy po angielsku. Stronę z angielskim napisem odrzuć
+  albo zregeneruj. Tekst na okładce składa moduł po polsku, nie AI.
 - Nie wrzucaj masowo niemal identycznych tytułów w jedną niszę. Każdy tytuł
   odrębny, z własną grafiką, tytułem i opisem.
 - Wnętrze generuj w **2K**, nie 4K. Pipeline składa wzór na płótnie strony w
