@@ -1,0 +1,224 @@
+{
+  "meta": {
+    "name": "Line-art prompt library for KDP coloring books",
+    "note": "Single source of truth for generation prompts. Print specs live in the kdp-compliance skill's kdp_specs.json; this file holds only prompt content. Prompt terms are English for image models. Listing keywords are split PL/EN.",
+    "trends_2026": "Bold and easy is the top kids growth trend: thick outlines, one large subject per page, no clutter. Kawaii dominates the axolotl niche. Cozy and seasonal angles sell. 8.5x8.5 favored by many bestsellers. Detail scales up with age.",
+    "sources": [
+      "accio.com/business/best-selling-coloring-book-themes",
+      "automateed.com/profitable-niches-for-low-content-books",
+      "kdpeasy.com/guides/coloring-book-trends-2026",
+      "thesillyscissors.com/kawaii-axolotl-coloring-pages",
+      "amazon.com listings for axolotl and bold-and-easy toddler coloring books"
+    ]
+  },
+
+  "base_style": {
+    "core": [
+      "flat 2d black and white line art",
+      "coloring page",
+      "clean line art",
+      "bold clean outlines",
+      "uniform line weight",
+      "closed continuous contours",
+      "no shading",
+      "no gradients",
+      "no gray fills",
+      "plain white background filling the entire frame",
+      "one subject centered",
+      "high contrast",
+      "printable"
+    ],
+    "negative": [
+      "shading",
+      "gradient",
+      "grayscale fill",
+      "hatching",
+      "cross-hatching",
+      "stippling",
+      "photorealistic",
+      "3d render",
+      "realistic texture",
+      "color",
+      "colored",
+      "watermark",
+      "signature",
+      "text",
+      "letters",
+      "frame",
+      "border",
+      "page border",
+      "page edge",
+      "book mockup",
+      "photo of a book",
+      "open book",
+      "notebook",
+      "spiral binding",
+      "rounded corners",
+      "drop shadow",
+      "vignette",
+      "paper texture",
+      "3d mockup",
+      "isometric",
+      "busy background",
+      "tiny details",
+      "broken lines",
+      "sketchy lines",
+      "double outlines"
+    ]
+  },
+
+  "age_groups": {
+    "3-4": {
+      "label": "Toddlers / przedszkole młodsze",
+      "positive": [
+        "extra thick bold outlines",
+        "one single simple subject",
+        "very large open areas to color",
+        "big rounded friendly shapes",
+        "no background",
+        "minimal details",
+        "oversized simple features"
+      ],
+      "negative": ["small details", "background elements", "patterns", "multiple subjects", "thin lines"],
+      "recommended_styles": ["kawaii", "fantasy_costume", "seasonal"],
+      "designs_default": 30
+    },
+    "5-6": {
+      "label": "Przedszkole starsze / zerówka",
+      "positive": [
+        "thick bold outlines",
+        "one main subject",
+        "a few simple background elements like bubbles or water plants",
+        "large clear areas to color",
+        "gentle simple details",
+        "uncluttered composition"
+      ],
+      "negative": ["dense patterns", "tiny intricate details", "crowded scene", "thin fragile lines"],
+      "recommended_styles": ["kawaii", "cozy", "fantasy_costume", "seasonal", "habitat_scene"],
+      "designs_default": 40
+    },
+    "6-7": {
+      "label": "Wczesnoszkolne",
+      "positive": [
+        "bold clean outlines with some finer accents",
+        "a small scene or habitat around the subject",
+        "one or two companion elements",
+        "simple decorative patterns",
+        "more areas to color but still uncluttered",
+        "balanced composition"
+      ],
+      "negative": ["overwhelming detail", "very thin lines", "photorealistic complexity"],
+      "recommended_styles": ["kawaii", "cozy", "habitat_scene", "realistic_simple", "patterned", "fantasy_costume", "seasonal"],
+      "designs_default": 40
+    }
+  },
+
+  "styles": {
+    "kawaii": {
+      "label": "Kawaii / cute",
+      "positive": ["kawaii style", "big sparkling eyes", "tiny hands", "frilly gills", "soft happy smile", "chubby rounded body", "adorable", "chibi proportions"],
+      "note": "Core seller in the axolotl niche. Works for every age group."
+    },
+    "cozy": {
+      "label": "Cozy / lifestyle",
+      "positive": ["cozy scene", "soft hoodie", "holding a warm mug", "sitting on a cushion", "wrapped in a blanket", "relaxed and content"],
+      "note": "Rides the strong cozy trend. Best for 5-6 and 6-7."
+    },
+    "fantasy_costume": {
+      "label": "Fantasy / costume",
+      "positive": ["whimsical costume", "tiny crown", "fairy wings", "little cape", "wizard hat", "magical accessory", "playful and imaginative"],
+      "note": "Costumes and props add variety across a book."
+    },
+    "seasonal": {
+      "label": "Seasonal / holiday",
+      "positive": ["seasonal holiday theme", "festive accessory", "party mood"],
+      "seasons": {
+        "christmas": ["santa hat", "scarf", "small gift", "snowflakes"],
+        "halloween": ["small pumpkin", "friendly ghost", "witch hat"],
+        "easter": ["decorated egg", "bunny ears", "spring flowers"],
+        "birthday": ["party hat", "balloon", "small cake", "confetti"],
+        "valentine": ["small heart", "love theme", "cute bow"]
+      },
+      "note": "Seasonal books are a reliable secondary angle. Pass --season to pick."
+    },
+    "habitat_scene": {
+      "label": "Habitat / underwater scene",
+      "positive": ["underwater habitat", "water plants", "rising bubbles", "smooth rocks", "aquatic scene", "gentle waves"],
+      "note": "Richer scenes for older kids. Keep areas large for 5-6."
+    },
+    "realistic_simple": {
+      "label": "Simple realistic / educational",
+      "positive": ["natural axolotl shape", "simple accurate anatomy", "gentle realistic proportions", "clear educational illustration"],
+      "note": "Pairs well with fun-facts books for 6-7."
+    },
+    "patterned": {
+      "label": "Patterned / decorative",
+      "positive": ["simple decorative patterns on the body", "gentle mandala-like accents", "symmetrical shapes", "light ornamentation"],
+      "note": "Adds coloring interest for 6-7 without clutter."
+    }
+  },
+
+  "themes": {
+    "axolotl": {
+      "label": "Axolotl / aksolotl",
+      "subject_base": "cute axolotl",
+      "companions": ["little fish", "small snail", "friendly frog", "tiny crab", "baby axolotl"],
+      "scenes": [
+        "swimming among soft water plants and bubbles",
+        "resting on a smooth round rock",
+        "sitting inside a teacup",
+        "wearing a tiny crown like a little king",
+        "holding a single round balloon",
+        "floating up with a bunch of balloons",
+        "peeking out from behind a lotus flower",
+        "blowing a stream of bubbles",
+        "sleeping curled up cozy",
+        "with a small snail sitting on its head",
+        "surfing on a big leaf",
+        "swimming among lily pads",
+        "wearing a flower crown",
+        "with a little bow on its head",
+        "swimming through a ring of bubbles",
+        "next to a small treasure chest",
+        "waving hello with a big smile",
+        "hugging a tiny fish friend",
+        "sitting in a small bowl with water",
+        "reading a little book"
+      ],
+      "keywords_en": ["axolotl coloring book", "cute axolotl", "kawaii axolotl", "axolotl for kids", "bold and easy axolotl", "axolotl coloring pages"],
+      "keywords_pl": ["kolorowanka aksolotl", "aksolotl dla dzieci", "aksolotki kolorowanka", "urocze aksolotle", "kolorowanka dla przedszkolaka"]
+    }
+  },
+
+  "consistency": {
+    "note": "For one book, keep theme, age group and style fixed and vary only the scene. Reuse the same image-model seed or style reference across pages so the character of the line stays constant (workflow step 2). Generate a few pages first, confirm one consistent look, then generate the rest."
+  },
+
+  "cover_style": {
+    "positive": [
+      "full color children's book cover illustration",
+      "vibrant cheerful colors",
+      "cute kawaii character",
+      "bold clean shapes",
+      "one friendly character centered in the lower two thirds",
+      "simple soft background",
+      "large clear empty space across the top for a title",
+      "eye-catching",
+      "polished professional illustration"
+    ],
+    "negative": [
+      "text",
+      "letters",
+      "words",
+      "title",
+      "typography",
+      "watermark",
+      "signature",
+      "frame",
+      "border",
+      "cluttered composition",
+      "busy background"
+    ],
+    "note": "Cover art is full color and carries no text. The title is typeset by the cover module, so leave headroom at the top and keep the character clear of the edges."
+  }
+}
