@@ -6,9 +6,19 @@ w `CLAUDE.md`.
 ## W toku
 
 - [ ] Pierwszy tytuł: aksolotki 5-6 lat, kawaii, 8.5x11, 40 wzorów.
-  - [ ] Wygenerować 40 wzorów przez NB2 (4K), przejrzeć strona po stronie.
-  - [ ] Złożyć wnętrze i przejść walidator (`build --strict`).
-  - [ ] Kolorowy przód okładki + skład okładki z marką Kolorowe Skarby.
+  - [x] Wygenerować 40 wzorów przez NB2 (4K).
+  - [x] Złożyć wnętrze i przejść walidator (`build --strict`, RESULT PASS).
+  - [x] Kolorowy przód okładki + skład okładki (wersja robocza).
+  - [ ] Przegląd ręczny 40 stron (zamknięte kontury, artefakty, pola).
+  - [ ] Finalny tytuł i teksty z badania SEO (patrz niżej), wstawić na okładkę.
+  - [ ] Przerobić typografię okładki (task poniżej), potem finalny cover.
+
+## Zaplanowane
+
+- [ ] **Typografia okładki**: przerobić skład tytułu jak w niszy. Duże,
+  kolorowe, obrysowane litery "bąbelkowe" wprost na scenie, z cieniem i
+  konturem, bez białych plomb pod tekstem. Opcjonalnie półprzezroczysta wstęga
+  pod podtytułem. Cel: dorównać okładkom konkurencji zamiast płaskiego tekstu.
 
 ## Backlog
 
@@ -17,13 +27,16 @@ w `CLAUDE.md`.
 Osobno dla rynku PL (Amazon.pl) i EN (Amazon.com). Rynki różnią się sposobem
 wyszukiwania, więc nie tłumacz fraz jeden do jednego.
 
-- [ ] Rynek polski: przeprowadzić osobne badanie słów kluczowych na podstawie
-  lokalnego wolumenu wyszukiwań. Rodzice w Polsce wyszukują inaczej niż w USA.
-  Opracować po polsku:
-  - [ ] tytuł
-  - [ ] podtytuł
-  - [ ] opis sprzedażowy
-  - [ ] siedem tagów (backend keywords) w panelu KDP
+- [~] Rynek polski: badanie słów kluczowych na podstawie lokalnego wolumenu.
+  Wersja oparta na analizie konkurencji jest w `docs/seo_axolotl_pl.md`
+  (tytuł, podtytuł, opis, 7 tagów, kategorie). Do domknięcia: walidacja
+  realnego wolumenu przez autouzupełnianie Amazon.pl i narzędzie (Helium 10 /
+  Publisher Rocket), bo tu nie mam dostępu do liczb.
+  - [x] tytuł (propozycja)
+  - [x] podtytuł (propozycja)
+  - [x] opis sprzedażowy (propozycja)
+  - [x] siedem tagów (backend keywords)
+  - [ ] walidacja wolumenu i finalny wybór wariantu
 - [ ] Rynek zagraniczny (US): optymalizacja SEO tytułu, podtytułu, opisu i
   siedmiu tagów pod wyszukiwania anglojęzyczne.
 - [ ] Zbudować narzędzie/proces badania słów kluczowych (źródła wolumenu,
