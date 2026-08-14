@@ -21,6 +21,10 @@ wnętrze i okładkę, walidowane pod KDP.
 - Domyślny model obrazowy: **Nano Banana 2** (`gemini-3.1-flash-image`). Pro
   (`gemini-3-pro-image`) tylko gdy potrzebna najwyższa jakość, np. złożona
   okładka.
+- **Przyszły format: książeczki 58-stronicowe** (29 wzorów przy druku
+  jednostronnym). Uwaga: 58 < 79 stron, więc KDP nie pozwala na tekst na
+  grzbiecie. Moduł okładki sam go pomija (`spine_text_allowed`). Grzbiet dla 58
+  stron na białym papierze to ok. 0,13 cala, i tak potwierdź w kalkulatorze KDP.
 
 ## Architektura
 

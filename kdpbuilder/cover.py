@@ -311,12 +311,14 @@ def build_cover(
         _draw_lines_outlined(tdraw, lines, font, lh, fcx, px(reg["bleed_in"] + safe),
                              tit_fill, tit_outline, ow, soff)
 
+    # Subtitle and author use the rounded title font so the front reads as one
+    # cohesive playful design; the back blurb stays in the body font for reading.
     band_lines = []
     if subtitle:
-        sfont, slines, slh = _fit_block(tdraw, subtitle, font_body, fw - px(0.4), px(1.1), int(fw * 0.075))
+        sfont, slines, slh = _fit_block(tdraw, subtitle, font_title, fw - px(0.4), px(1.1), int(fw * 0.07))
         band_lines.append((slines, sfont, slh))
     if author:
-        afont, alines, alh = _fit_block(tdraw, author, font_body, fw - px(0.4), px(0.7), int(fw * 0.075))
+        afont, alines, alh = _fit_block(tdraw, author, font_title, fw - px(0.4), px(0.7), int(fw * 0.06))
         band_lines.append((alines, afont, alh))
     if band_lines:
         pad = px(0.18)
