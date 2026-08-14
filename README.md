@@ -158,6 +158,17 @@ cieniem) z folderu `--thumbs`, dokłada bąbelki i błyski oraz naklejkę
 trzymane czyste, a KDP nakłada kod sam. `--no-wrap` daje jednolity tył,
 `--no-decorations` wyłącza bąbelki.
 
+Tytuł ma bogaty efekt (gradient, gloss, podwójny kontur, cień 3D), a napisy
+siedzą na kolorowych wstęgach (`--banner-style scallop/ribbon/pill`, kolor
+`--banner`, obwódka `--banner-border`). Logo marki (`--logo`, domyślnie Kolorowe
+Skarby, SVG) ląduje w lewym dolnym rogu tyłu.
+
+Okładka działa jak **szablon ze slotami**. Zamiast proceduralnej wstęgi w slot
+podtytułu albo blurba można wstawić gotowy dekoracyjny asset (przezroczysty
+PNG/SVG, ręczny albo wygenerowany AI) przez `--subtitle-asset` i `--blurb-asset`,
+a tekst i tak składa moduł na wierzchu (poprawna polszczyzna zostaje po naszej
+stronie).
+
 ```bash
 # z gotową grafiką przodu
 python -m kdpbuilder.cli cover --out cover.pdf --trim 8.5x11 --pages 80 --paper bw_white \
