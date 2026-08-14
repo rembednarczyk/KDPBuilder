@@ -11,7 +11,10 @@ w `CLAUDE.md`.
   - [x] Kolorowy przód okładki + skład okładki (wersja robocza).
   - [ ] Przegląd ręczny 40 stron (zamknięte kontury, artefakty, pola).
   - [ ] Finalny tytuł i teksty z badania SEO (patrz niżej), wstawić na okładkę.
-  - [ ] Przerobić typografię okładki (task poniżej), potem finalny cover.
+  - [x] Przerobić typografię okładki.
+- [ ] Regeneracja wnętrza w 2K + profil wieku 4-8 + nowe negatywy (mniej kleksów,
+  bogatsze wzory, ~połowa kosztu). WSTRZYMANE, żeby ograniczyć koszty. Odblokować,
+  gdy wrócimy do generowania.
 
 ## Zaplanowane
 
@@ -40,11 +43,13 @@ wyszukiwania, więc nie tłumacz fraz jeden do jednego.
   - [x] opis sprzedażowy (propozycja)
   - [x] siedem tagów (backend keywords)
   - [ ] walidacja wolumenu i finalny wybór wariantu
-- [ ] Rynek zagraniczny (US): optymalizacja SEO tytułu, podtytułu, opisu i
-  siedmiu tagów pod wyszukiwania anglojęzyczne.
-- [ ] Zbudować narzędzie/proces badania słów kluczowych (źródła wolumenu,
-  lista frazowa, mapowanie na tytuł i tagi), żeby był powtarzalny dla kolejnych
-  tytułów, a nie jednorazowy.
+- [~] Rynek zagraniczny (US): pakiet w `docs/seo_axolotl_en.md` (tytuł,
+  podtytuł, opis, 7 tagów, kategorie). Do domknięcia: walidacja wolumenu na
+  Amazon.com.
+- [x] Powtarzalne narzędzie badania słów kluczowych: komenda `keywords`
+  (`kdpbuilder/keywords.py`) wyciąga frazy z częstością z zapisanych aukcji,
+  z filtrem `--contains niche` na dumpy HTML. Nie daje wolumenu (do walidacji
+  narzędziem zewnętrznym), ale daje powtarzalną listę kandydatów.
 
 ### Pixel-perfect skaner PDF
 
@@ -71,7 +76,10 @@ wyszukiwania, więc nie tłumacz fraz jeden do jednego.
 
 - [x] Skill kdp-compliance z walidatorem PDF.
 - [x] Pipeline kdpbuilder: prompts, imageprep, assemble, specs, cli.
-- [x] Biblioteka promptów: 3 grupy wieku, 7 stylistyk, temat aksolotl.
-- [x] Integracja generacji obrazów przez Gemini API (domyślnie NB2).
-- [x] Moduł okładki: kalkulator grzbietu, skład wrap PDF z tekstem i spadem.
-- [x] Zestaw tytułów i opisów PL/EN (wersja startowa, przed badaniem SEO).
+- [x] Biblioteka promptów: grupy wieku (3-4, 4-8, 5-6, 6-7), 7 stylistyk, aksolotl.
+- [x] Integracja generacji obrazów przez Gemini API (domyślnie NB2, 2K dla wnętrza).
+- [x] Moduł okładki: kalkulator grzbietu, wrap PDF, typografia z konturem i wstęgą.
+- [x] Skaner pikselowy `scan` (czystość, grubość linii, odpryski, margines, solid-fill).
+- [x] Pierwsze wnętrze: 40 wzorów wygenerowane, złożone, walidator i skaner PASS.
+- [x] SEO: pakiet PL (`seo_axolotl_pl.md`) i EN (`seo_axolotl_en.md`), narzędzie `keywords`.
+- [x] Optymalizacja kosztów: 2K dla wnętrza (~połowa kosztu 4K).

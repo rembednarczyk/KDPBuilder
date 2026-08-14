@@ -185,6 +185,28 @@ def cmd_cover(args) -> int:
     return 0
 
 
+def cmd_keywords(args) -> int:
+    from . import keywords as kkw
+
+    contains = None
+    if args.contains == "niche":
+        contains = kkw.NICHE_ROOTS_EN if args.lang == "en" else kkw.NICHE_ROOTS_PL
+    elif args.contains:
+        contains = [r.strip() for r in args.contains.split(",") if r.strip()]
+    try:
+        ranked = kkw.mine_files(args.files, lang=args.lang, ngram=(args.min_n, args.max_n),
+                                top=args.top, min_count=args.min_count, contains=contains)
+    except FileNotFoundError as e:
+        sys.stderr.write(str(e) + "\n")
+        return 2
+    if args.json:
+        print(json.dumps([{"phrase": p, "count": c} for p, c in ranked], indent=2, ensure_ascii=False))
+    else:
+        for p, c in ranked:
+            print("%5d  %s" % (c, p))
+    return 0
+
+
 def cmd_catalog(args) -> int:
     lib = prompts.load_prompt_lib()
     out = {
@@ -382,6 +404,19 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--font-title", default=None, help="TTF path for the title.")
     p.add_argument("--font-body", default=None, help="TTF path for body text.")
     p.set_defaults(func=cmd_cover)
+
+    p = sub.add_parser("keywords", help="Mine candidate keyword phrases from saved competitor text.")
+    p.add_argument("files", nargs="+", help="Text files (e.g. saved Amazon listing dumps).")
+    p.add_argument("--lang", default="pl", choices=["pl", "en"])
+    p.add_argument("--min-n", type=int, default=1, help="Minimum phrase length in words.")
+    p.add_argument("--max-n", type=int, default=3, help="Maximum phrase length in words.")
+    p.add_argument("--top", type=int, default=40)
+    p.add_argument("--min-count", type=int, default=2)
+    p.add_argument("--contains", default=None,
+                   help="Keep only phrases containing one of these roots (comma-separated), "
+                        "or 'niche' for the built-in coloring-book roots. Use on HTML dumps.")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(func=cmd_keywords)
 
     p = sub.add_parser("catalog", help="List available themes, age groups, styles and seasons.")
     p.set_defaults(func=cmd_catalog)

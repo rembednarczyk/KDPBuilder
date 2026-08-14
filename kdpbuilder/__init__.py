@@ -10,7 +10,7 @@ Print specs are read from the shared kdp_specs.json via specs.py. Do not
 duplicate the numbers anywhere else.
 """
 
-from . import assemble, cover, generate, imageprep, prompts, scan, specs
+from . import assemble, cover, generate, imageprep, keywords, prompts, scan, specs
 
-__all__ = ["assemble", "cover", "generate", "imageprep", "prompts", "scan", "specs"]
+__all__ = ["assemble", "cover", "generate", "imageprep", "keywords", "prompts", "scan", "specs"]
 __version__ = "0.1.0"
