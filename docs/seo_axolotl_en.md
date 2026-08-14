@@ -9,8 +9,9 @@ and the kawaii style carry more of the ranking than on Amazon.pl.
 I do not have a keyword-volume tool here. This package is grounded in competitor
 titles, common niche phrasing, and both spellings of the animal. Validate before
 publishing with Amazon.com autocomplete and a tool (Helium 10 or Publisher
-Rocket), then pick the final variant. The keyword miner (`kdpbuilder keywords`)
-helps rank candidate phrases from saved competitor listings.
+Rocket), then pick the final variant. The keyword miner (`expand_seeds` on .com)
+helps surface the phrases Amazon itself suggests, and it ranks candidate phrases
+from saved competitor listings.
 
 ## Age framing
 
@@ -35,19 +36,27 @@ Title variants to test:
 
 ## Seven backend keyword tags (KDP)
 
-New words, no repeats of the title, phrase-based, both spellings covered, no
-competitor brands. Each under 50 characters.
+New words that the title and subtitle do not already contain. Amazon matches a
+query against all indexed fields together, so the title already supplies
+"axolotl", "coloring", "book", "kids" and the tags add fresh concepts. Each is
+under 50 characters, phrase-based, no competitor brands.
 
-1. `axolotl coloring pages for toddlers`
-2. `kawaii sea animals coloring book`
-3. `gift for boys and girls age 4 5 6`
-4. `bold easy large print coloring`
-5. `cute ocean creatures for kids`
-6. `preschool kindergarten activity book`
-7. `axololt coloring book` (common misspelling; verify it still gets traffic)
+1. `sea creatures activity for preschoolers`
+2. `ocean animals gift for 5 6 7 year olds`
+3. `fine motor skills for small hands`
+4. `first crayon set birthday present`
+5. `marine life stress free quiet time`
+6. `kindergarten homeschool workbook`
+7. `learn to color large print for beginners`
 
-Note: tag 7 is a deliberate misspelling to catch mistyped searches. Confirm it
-before use; drop it if it looks spammy in your niche.
+On misspellings: Amazon search handles common misspellings and autocorrects, so
+a deliberate `axololt` tag mostly wastes a slot and can read as spam. The 7th
+slot is better spent on a real high-intent phrase, as above. If a volume tool
+later shows steady misspelling traffic in this exact niche, test it then.
+
+Left out on purpose: words already in the title or subtitle (axolotl, coloring,
+book, kids, ages 4-8, cute, kawaii, bold, easy, thick, lines, underwater, boys,
+girls), competitor brands, rating claims like "bestseller".
 
 ## Sales description
 
@@ -74,13 +83,21 @@ crayons and start coloring.
 
 ## Categories (KDP)
 
+KDP lets you pick up to three categories from its own list, and the browse-node
+names shown on Amazon can differ slightly, so choose the closest match:
 - Children's Coloring Books
 - Children's Fish & Marine Life Books
 - Crafts & Hobbies (children's)
 
 ## Notes
 
-- Cover both spellings: axolotl (main) and the misspelling axololt in a tag.
+- Select "Yes, AI-Generated" for the images at publish. This is private to KDP,
+  invisible to buyers, and skipping it risks takedown or account suspension.
+- The animal name (axolotl) is covered by the title. Amazon autocorrects common
+  misspellings, so add a misspelled variant tag only if a volume tool shows real
+  traffic for it in this niche.
 - The US niche is busier than PL. Compete on cover quality and the kawaii style.
 - Competitor sample had 54 designs; ours has 40. Consider adding designs or
   leaning on style and cover in the listing.
+- After publishing, test indexing in an incognito window at 24-72 hours, then at
+  day 7 and day 30, and swap any tag that does not index.

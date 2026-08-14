@@ -13,7 +13,9 @@ Nie mam tu dostępu do narzędzia z liczbami wyszukiwań. Ten pakiet opiera się
 
 Przed publikacją zwaliduj wolumen: wpisz frazy w wyszukiwarkę Amazon.pl i patrz
 na autouzupełnianie, a dla liczb użyj Helium 10 albo Publisher Rocket. Warianty
-poniżej są ułożone tak, żeby dało się je łatwo podmienić po walidacji.
+poniżej są ułożone tak, żeby dało się je łatwo podmienić po walidacji. Frazy z
+tego pakietu możesz też przepuścić przez własny miner (`expand_seeds` na .pl),
+żeby zobaczyć, co Amazon sam podpowiada.
 
 ## Co robi konkurencja (wnioski)
 
@@ -57,21 +59,34 @@ Warianty tytułu do testów:
 
 ## Siedem tagów (backend keywords w panelu KDP)
 
-Zasada: nie powtarzaj słów z tytułu i podtytułu, bo one są już indeksowane. Te
-tagi dokładają nowe frazy, obie pisownie w liczbie pojedynczej, prezent, kategorie
-i słowa edukacyjne. Każdy tag mieści się w 50 znakach.
+Zasada: nie powtarzaj słów z tytułu i podtytułu, bo są już indeksowane, a Amazon
+dopasowuje zapytanie do słów ze wszystkich pól razem. Tytuł podaje "kolorowanka"
+i "dzieci", więc zapytanie "kolorowanka dla przedszkolaka" złapie się z tytułu
+plus tagu, bez wpisywania "kolorowanka" drugi raz. Tagi dokładają nowe frazy:
+drugą pisownię w liczbie pojedynczej, prezent, płeć, synonimy i słowa
+edukacyjne. Każdy tag mieści się w 50 znakach.
 
-1. `kolorowanka dla przedszkolaka`
+1. `dla przedszkolaka i zerówki`
 2. `prezent dla dziewczynki i chłopca`
-3. `zwierzęta morskie wodne stworzenia`
+3. `zwierzęta wodne oceaniczne stworzenia`
 4. `słodkie zwierzątka do malowania`
 5. `aksolotl axolotl meksykański`
-6. `łatwe kolorowanki dla malucha`
+6. `pierwsza malowanka dla malucha`
 7. `książeczka relaks nauka kolorów`
 
-Czego świadomie nie ma w tagach: słów już użytych w tytule i podtytule
+Co świadomie zostaje poza tagami: słowa już użyte w tytule i podtytule
 (aksolotle, kolorowanka, dzieci, morski, świat, kawaii, grube, linie, duże,
-pola, 4-8 lat), nazw konkurencji, ocen typu "bestseller".
+pola, łatwe, 4-8 lat), nazwy konkurencji, oceny typu "bestseller".
+
+Dlaczego tak:
+- Tag 5 obejmuje obie pisownie w liczbie pojedynczej i frazę "aksolotl
+  meksykański", której rodzice używają w wyszukiwarce.
+- Tag 6 dokłada synonim "malowanka" oraz "pierwsza", bo część rodziców szuka
+  pierwszej książeczki do malowania dla malucha.
+- Tag 1 celuje w polskie realia przedszkola i zerówki, których nie ma w tytule.
+
+Do przetestowania po walidacji: jeśli narzędzie pokaże słaby tag, podmień go na
+okazję (`na urodziny i mikołajki`) albo węższy wiek (`dla 3 latka`).
 
 ## Opis sprzedażowy
 
@@ -101,7 +116,9 @@ Chwyćcie za kredki i zacznijcie kolorować razem.
 
 ## Kategorie KDP (propozycja)
 
-Wybierz kategorie zbieżne z konkurencją:
+Wybierz kategorie zbieżne z konkurencją. KDP pozwala wskazać do trzech kategorii
+z własnej listy, a widoczne na Amazonie węzły mogą mieć nieco inne nazwy, więc
+wybierz najbliższe dopasowanie:
 - Ryby i zwierzęta morskie dla dzieci
 - Rękodzieło i malarstwo dla dzieci
 - Kolorowanki dla dzieci (jeśli dostępna jako osobny węzeł)
@@ -115,9 +132,14 @@ Wybierz kategorie zbieżne z konkurencją:
   kolejnej iteracji, albo mocno podkreśl jakość i styl kawaii w opisie i na
   okładce.
 - Obie pisownie aksolotl i axolotl są ważne. Pilnuj, żeby obie były w metadanych
-  (tu: aksolotle w tytule, axolotli w podtytule, aksolotl i axolotl w tagach).
+  (tu: aksolotle w tytule, axolotli w podtytule, aksolotl i axolotl w tagu 5).
 
 ## Do domknięcia
 
-- Walidacja realnego wolumenu (autouzupełnianie Amazon.pl + narzędzie).
+- Zaznacz "Yes, AI-Generated" dla obrazów przy publikacji. To informacja
+  prywatna dla KDP, niewidoczna dla kupujących. Brak ujawnienia grozi usunięciem
+  tytułu lub zawieszeniem konta.
+- Walidacja realnego wolumenu (autouzupełnianie Amazon.pl plus narzędzie).
+- Test indeksowania po publikacji: w trybie incognito wpisz frazy po 24-72
+  godzinach, potem w dniu 7 i 30, i podmień tagi, które nie wchodzą.
 - Osobny pakiet pod Amazon.com (EN), nie tłumaczenie tego jeden do jednego.
