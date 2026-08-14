@@ -22,7 +22,11 @@ from PIL import Image, ImageDraw, ImageFont
 
 from . import specs as kspecs
 
-DEFAULT_TITLE_FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+_BUNDLED_TITLE = Path(__file__).resolve().parent / "data" / "fonts" / "Baloo2-ExtraBold.ttf"
+# Rounded, bold, playful title font (Baloo 2, OFL) for the niche look; fall back
+# to DejaVu Bold if the bundled file is missing.
+DEFAULT_TITLE_FONT = str(_BUNDLED_TITLE) if _BUNDLED_TITLE.exists() else \
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 DEFAULT_BODY_FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 
 
