@@ -8,3 +8,9 @@ dist/
 venv/
 *.pdf
 !docs/**/*.pdf
+
+# secrets: never commit API keys
+.env
+.env.*
+*.key
+*_api_key*
