@@ -257,6 +257,7 @@ def cmd_assemble(args) -> int:
         bleed=args.bleed,
         single_sided=not args.no_single_sided,
         dpi=args.dpi,
+        gutter=not args.no_gutter,
     )
     print(json.dumps(summary, indent=2, ensure_ascii=False))
     return 0
@@ -320,6 +321,7 @@ def cmd_build(args) -> int:
         bleed=args.bleed,
         single_sided=not args.no_single_sided,
         dpi=args.dpi,
+        gutter=not args.no_gutter,
     )
     print(json.dumps(summary, indent=2, ensure_ascii=False))
     print("Validating...")
@@ -438,6 +440,8 @@ def build_parser() -> argparse.ArgumentParser:
         p.add_argument("--bleed", action="store_true", help="Set up with bleed (art to edge).")
         p.add_argument("--dpi", type=int, default=None, help="Render DPI (default from specs).")
         p.add_argument("--no-single-sided", action="store_true", help="Skip blank backing pages.")
+        p.add_argument("--no-gutter", action="store_true",
+                       help="Use a symmetric margin instead of a larger binding-side gutter.")
         if name == "build":
             p.add_argument("--threshold", type=int, default=None)
             p.add_argument("--thicken", type=int, default=0)

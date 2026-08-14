@@ -137,8 +137,8 @@
   "styles": {
     "kawaii": {
       "label": "Kawaii / cute",
-      "positive": ["kawaii style", "big sparkling eyes", "tiny hands", "frilly gills", "soft happy smile", "chubby rounded body", "adorable", "chibi proportions"],
-      "note": "Core seller in the axolotl niche. Works for every age group."
+      "positive": ["kawaii style", "big sparkling eyes", "tiny hands", "soft happy smile", "chubby rounded body", "adorable", "chibi proportions"],
+      "note": "Core seller. Theme-neutral so it works for any subject, not only axolotls."
     },
     "cozy": {
       "label": "Cozy / lifestyle",
@@ -208,6 +208,99 @@
       ],
       "keywords_en": ["axolotl coloring book", "cute axolotl", "kawaii axolotl", "axolotl for kids", "bold and easy axolotl", "axolotl coloring pages"],
       "keywords_pl": ["kolorowanka aksolotl", "aksolotl dla dzieci", "aksolotki kolorowanka", "urocze aksolotle", "kolorowanka dla przedszkolaka"]
+    },
+    "dinosaur": {
+      "label": "Dinosaur / dinozaur",
+      "subject_base": "cute dinosaur",
+      "companions": ["baby dinosaur", "dragonfly", "little bird"],
+      "scenes": [
+        "eating leaves from a tall tree",
+        "splashing in a puddle",
+        "near a smoking volcano",
+        "with a baby dinosaur",
+        "holding a big leaf",
+        "roaring happily",
+        "sleeping under a palm tree",
+        "walking among ferns",
+        "next to a big egg",
+        "chasing a butterfly",
+        "standing on a small hill",
+        "wearing a party hat",
+        "with a little friend",
+        "stomping through mud",
+        "looking at a shooting star"
+      ],
+      "keywords_en": ["dinosaur coloring book", "cute dinosaur", "dino for kids", "bold and easy dinosaur"],
+      "keywords_pl": ["kolorowanka dinozaury", "dinozaur dla dzieci", "dinozaury kolorowanka", "kolorowanka dla przedszkolaka"]
+    },
+    "unicorn": {
+      "label": "Unicorn / jednorożec",
+      "subject_base": "cute unicorn",
+      "companions": ["baby unicorn", "butterfly", "little bird"],
+      "scenes": [
+        "under a big rainbow",
+        "jumping over a fluffy cloud",
+        "wearing a flower crown",
+        "near a small castle",
+        "holding a balloon",
+        "with a shining star",
+        "eating an ice cream cone",
+        "sleeping on a cloud",
+        "with a baby unicorn",
+        "among big flowers",
+        "with a magic wand",
+        "splashing in a stream",
+        "with a little butterfly",
+        "wearing a party hat"
+      ],
+      "keywords_en": ["unicorn coloring book", "cute unicorn", "unicorn for kids", "bold and easy unicorn"],
+      "keywords_pl": ["kolorowanka jednorożec", "jednorożce dla dzieci", "jednorożce kolorowanka", "kolorowanka dla dziewczynki"]
+    },
+    "ocean": {
+      "label": "Ocean animals / zwierzęta morskie",
+      "subject_base": "cute",
+      "companions": ["little fish", "small crab", "bubbles"],
+      "scenes": [
+        "smiling fish among corals",
+        "happy octopus with curly arms",
+        "sea turtle swimming slowly",
+        "little crab on the sand",
+        "dolphin jumping over a wave",
+        "seahorse near sea plants",
+        "friendly whale spouting water",
+        "starfish resting on a rock",
+        "jellyfish floating with bubbles",
+        "seal balancing a ball",
+        "clownfish by an anemone",
+        "pufferfish full of round spikes",
+        "narwhal with a long horn",
+        "hermit crab in a shell"
+      ],
+      "keywords_en": ["ocean coloring book", "sea animals for kids", "cute sea creatures", "bold and easy ocean"],
+      "keywords_pl": ["kolorowanka zwierzęta morskie", "morskie zwierzęta dla dzieci", "ocean kolorowanka", "kolorowanka dla przedszkolaka"]
+    },
+    "cat": {
+      "label": "Cat / kotek",
+      "subject_base": "cute cat",
+      "companions": ["kitten", "butterfly", "little mouse toy"],
+      "scenes": [
+        "playing with a ball of yarn",
+        "sleeping in a basket",
+        "chasing a butterfly",
+        "sitting by a window",
+        "batting a round ball",
+        "drinking from a bowl of milk",
+        "curled up in a box",
+        "wearing a little bow",
+        "with a toy mouse",
+        "resting on a cushion",
+        "stretching after a nap",
+        "looking at a goldfish bowl",
+        "peeking out of a bag",
+        "wearing a party hat"
+      ],
+      "keywords_en": ["cat coloring book", "cute cat", "kitten for kids", "bold and easy cat"],
+      "keywords_pl": ["kolorowanka kotki", "kotek dla dzieci", "koty kolorowanka", "kolorowanka dla przedszkolaka"]
     }
   },
 
