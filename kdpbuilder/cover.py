@@ -36,6 +36,24 @@ DEFAULT_TITLE_FONT = str(_BUNDLED_TITLE) if _BUNDLED_TITLE.exists() else \
     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 DEFAULT_BODY_FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 
+_LOGO_DIR = Path(__file__).resolve().parent / "data" / "logo"
+# Default publisher logo (Kolorowe Skarby), horizontal variant.
+DEFAULT_LOGO = str(_LOGO_DIR / "kolorowe_skarby_poziom.svg")
+
+
+def load_logo_image(path, target_width: int = 1600) -> Image.Image:
+    """Load a logo as an RGBA image. SVG is rasterized with cairosvg (optional);
+    raster formats open directly."""
+    p = str(path)
+    if p.lower().endswith(".svg"):
+        try:
+            import cairosvg
+        except ImportError as e:
+            raise RuntimeError("SVG logo needs cairosvg (pip install cairosvg).") from e
+        png = cairosvg.svg2png(url=p, output_width=target_width)
+        return Image.open(io.BytesIO(png)).convert("RGBA")
+    return Image.open(p).convert("RGBA")
+
 
 def _hex(color) -> tuple:
     if isinstance(color, tuple):
@@ -298,6 +316,9 @@ def build_cover(
     banner_alpha=210,
     thumbnails: list | None = None,
     count_badge: str | None = None,
+    logo: Image.Image | None = None,
+    logo_where: str = "back",
+    logo_height_in: float = 0.75,
     decorations: bool = True,
     wrap: bool = True,
     dpi: int = 300,
@@ -429,6 +450,17 @@ def build_cover(
         text.alpha_composite(strip, (sx, (H - strip.height) // 2))
         spine_note = "included"
 
+    # --- publisher logo (transparent PNG recommended) ---
+    if logo is not None:
+        lh = px(logo_height_in)
+        lw = max(1, int(logo.width * lh / max(1, logo.height)))
+        lg = logo.convert("RGBA").resize((lw, lh), Image.LANCZOS)
+        if logo_where == "front":
+            lx, ly = fx0, px(reg["bleed_in"] + safe)  # front top-left (badge is top-right)
+        else:
+            lx, ly = bx0, by1 - lh  # back bottom-left (barcode is bottom-right)
+        text.alpha_composite(lg, (int(lx), int(ly)))
+
     # --- compose all layers and save as a single-page PDF ---
     out = Image.alpha_composite(canvas.convert("RGBA"), deco)
     out = Image.alpha_composite(out, cards)
@@ -455,4 +487,5 @@ def build_cover(
         "spine_text": spine_note,
         "wrap": bool(wrap),
         "thumbnails": len(thumbnails) if thumbnails else 0,
+        "logo": logo is not None,
     }
