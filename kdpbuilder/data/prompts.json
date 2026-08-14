@@ -14,7 +14,8 @@
 
   "base_style": {
     "core": [
-      "black and white coloring book page",
+      "flat 2d black and white line art",
+      "coloring page",
       "clean line art",
       "bold clean outlines",
       "uniform line weight",
@@ -22,7 +23,7 @@
       "no shading",
       "no gradients",
       "no gray fills",
-      "pure white background",
+      "plain white background filling the entire frame",
       "one subject centered",
       "high contrast",
       "printable"
@@ -45,6 +46,19 @@
       "letters",
       "frame",
       "border",
+      "page border",
+      "page edge",
+      "book mockup",
+      "photo of a book",
+      "open book",
+      "notebook",
+      "spiral binding",
+      "rounded corners",
+      "drop shadow",
+      "vignette",
+      "paper texture",
+      "3d mockup",
+      "isometric",
       "busy background",
       "tiny details",
       "broken lines",

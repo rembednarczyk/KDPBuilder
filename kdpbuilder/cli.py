@@ -19,6 +19,7 @@ from pathlib import Path
 from PIL import Image
 
 from . import assemble as kassemble
+from . import generate as kgenerate
 from . import imageprep
 from . import prompts
 from . import specs as kspecs
@@ -93,6 +94,50 @@ def cmd_book_prompts(args) -> int:
         print("Wrote %d prompt(s) to %s" % (len(pages), args.out))
     else:
         print(text)
+    return 0
+
+
+def cmd_generate(args) -> int:
+    lib = prompts.load_prompt_lib()
+    if args.prompts:
+        try:
+            items = kgenerate.load_prompts_file(args.prompts)
+        except kgenerate.GenerateError as e:
+            sys.stderr.write(str(e) + "\n")
+            return 2
+    elif args.theme and args.age and args.style:
+        try:
+            items = prompts.build_book(
+                theme=args.theme, age=args.age, style=args.style,
+                count=args.count, season=args.season, lib=lib,
+            )
+        except prompts.PromptError as e:
+            sys.stderr.write(str(e) + "\n")
+            return 2
+    else:
+        sys.stderr.write("Provide --prompts FILE, or --theme --age --style to build them.\n")
+        return 2
+
+    aspect = args.aspect
+    if aspect is None and args.trim:
+        specs = kspecs.load_specs()
+        t = kspecs.trim(specs, args.trim)
+        aspect = kgenerate.aspect_for(float(t["w"]), float(t["h"]))
+
+    try:
+        backend = kgenerate.GeminiBackend(model=args.model, image_size=args.image_size)
+    except kgenerate.GenerateError as e:
+        sys.stderr.write(str(e) + "\n")
+        return 2
+
+    print("Generating with model %s at %s, aspect %s..." % (backend.model, args.image_size, aspect or "default"))
+    saved = kgenerate.generate_images(
+        items, out_dir=args.out, backend=backend, aspect_ratio=aspect,
+        sleep=args.sleep, retries=args.retries, resume=not args.no_resume, limit=args.limit,
+    )
+    print("Done. %d image(s) in %s" % (len(saved), args.out))
+    print("Next: review each page, then clean and assemble:")
+    print("  python -m kdpbuilder.cli build %s --out interior.pdf --trim %s" % (args.out, args.trim or "8.5x11"))
     return 0
 
 
@@ -232,6 +277,24 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--format", choices=["json", "csv"], default="json")
     p.add_argument("--out", help="Write to this file instead of stdout.")
     p.set_defaults(func=cmd_book_prompts)
+
+    p = sub.add_parser("generate", help="Generate raw line-art images via the Gemini API.")
+    p.add_argument("--out", required=True, help="Folder for the generated PNGs.")
+    p.add_argument("--prompts", help="Prompts file from book-prompts (.json or .csv).")
+    p.add_argument("--theme", help="Theme key (if not using --prompts).")
+    p.add_argument("--age", help="Age group (if not using --prompts).")
+    p.add_argument("--style", help="Style (if not using --prompts).")
+    p.add_argument("--count", type=int, default=40, help="Designs when building prompts inline.")
+    p.add_argument("--season", help="Season for the seasonal style.")
+    p.add_argument("--trim", help="Trim key; sets the aspect ratio to match, e.g. 8.5x11.")
+    p.add_argument("--aspect", help="Override aspect ratio (1:1, 3:4, 2:3, ...).")
+    p.add_argument("--image-size", default="4K", choices=kgenerate.SUPPORTED_SIZES)
+    p.add_argument("--model", default=None, help="Model id (default Nano Banana Pro or GEMINI_IMAGE_MODEL).")
+    p.add_argument("--sleep", type=float, default=0.0, help="Seconds to wait between images.")
+    p.add_argument("--retries", type=int, default=3)
+    p.add_argument("--limit", type=int, default=None, help="Only generate the first N prompts.")
+    p.add_argument("--no-resume", action="store_true", help="Regenerate even if a file exists.")
+    p.set_defaults(func=cmd_generate)
 
     p = sub.add_parser("catalog", help="List available themes, age groups, styles and seasons.")
     p.set_defaults(func=cmd_catalog)

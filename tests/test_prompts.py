@@ -16,7 +16,7 @@ def test_library_loads(lib):
 
 def test_core_and_negatives_always_present(lib):
     pair = prompts.build_pair("cute axolotl", age="5-6", style="kawaii", lib=lib)
-    assert "coloring book page" in pair["prompt"]
+    assert "coloring page" in pair["prompt"]
     assert "no shading" in pair["prompt"]
     assert "color" in pair["negative_prompt"]
     assert "kawaii style" in pair["prompt"]

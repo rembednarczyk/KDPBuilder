@@ -33,6 +33,9 @@ Nie powielaj liczb w kodzie.
 pip install -r requirements.txt
 # lub jako pakiet z komendą `kdpbuilder`:
 pip install -e .
+# generacja obrazów przez Gemini API (opcjonalnie):
+pip install -e ".[gen]"
+export GEMINI_API_KEY=twoj_klucz
 ```
 
 ## Workflow (kroki 1-6 z instrukcji projektu)
@@ -70,6 +73,40 @@ python -m kdpbuilder.cli book-prompts --theme axolotl --age 5-6 --style kawaii \
 Zwraca prompt pozytywny i negatywny w stylu bold and easy. Grafikę generujesz
 swoim narzędziem AI. Dla spójności użyj tego samego seeda lub referencji stylu na
 wszystkich stronach: wygeneruj kilka, potwierdź jeden wygląd, dopiero potem resztę.
+
+### 2. Generacja obrazów (Gemini API)
+
+Integracja z Gemini (Nano Banana) generuje surowe grafiki z promptów. Wymaga
+`pip install -e ".[gen]"` i klucza `GEMINI_API_KEY`.
+
+Z pliku promptów (z `book-prompts`):
+
+```bash
+python -m kdpbuilder.cli generate --out raw/ --prompts prompts.csv --trim 8.5x11 --image-size 4K
+```
+
+Albo budując prompty od razu:
+
+```bash
+python -m kdpbuilder.cli generate --out raw/ --theme axolotl --age 3-4 --style kawaii \
+  --count 40 --trim 8.5x11 --image-size 4K
+```
+
+`--trim` ustawia aspect ratio pod format (8.5x11 to 3:4, 8.5x8.5 to 1:1). Bieg
+wznawia się po przerwaniu (istniejące pliki pomija). `--sleep` reguluje tempo,
+`--limit` generuje tylko pierwsze N, `--model` zmienia model.
+
+Rozdzielczość pod druk: dla pełnostronicowej grafiki użyj `--image-size 4K`.
+Test pokazał, że 4K na 8.5x11 to ~420 DPI, a 2K tylko ~210 DPI (za mało). 2K
+wystarcza, gdy wzór jest mniejszy niż strona i składany w obrębie marginesów.
+
+Domyślny model to Nano Banana Pro (`gemini-3-pro-image-preview`). Nazwy i ceny
+modeli się zmieniają, potwierdź w dokumentacji Google. Klucz trzymaj w zmiennej
+środowiskowej, nie w repo.
+
+Po generacji przejrzyj każdą stronę (krok 6): brak artefaktów, zamknięte
+kontury, pola nadające się do kolorowania. Dopiero potem składaj. Wynik AI to
+półprodukt, nie plik gotowy do publikacji.
 
 ### 3-4. Czyszczenie do czystego B&W
 
