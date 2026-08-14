@@ -293,6 +293,58 @@ def _pick(items, k):
     return [items[int(i * step)] for i in range(k)]
 
 
+def _lum(rgb):
+    return (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) / 255.0
+
+
+def _banner_mask(w, h, style, radius):
+    """L mask for a decorative banner shape."""
+    mask = Image.new("L", (w, h), 0)
+    d = ImageDraw.Draw(mask)
+    if style == "scallop":
+        br = max(6, int(h * 0.16))
+        d.rounded_rectangle([0, br, w - 1, h - 1 - br],
+                            radius=min(radius, max(1, (h - 2 * br) // 2)), fill=255)
+        n = max(3, round(w / (br * 2)))
+        step = w / n
+        for i in range(n):
+            cx = step * (i + 0.5)
+            d.ellipse([cx - br, 0, cx + br, 2 * br], fill=255)
+            d.ellipse([cx - br, h - 2 * br, cx + br, h], fill=255)
+    elif style == "ribbon":
+        tail = int(h * 0.55)
+        d.rectangle([tail, 0, w - 1 - tail, h - 1], fill=255)
+        d.polygon([(0, 0), (tail, 0), (tail, h - 1), (0, h - 1), (int(tail * 0.5), h / 2)], fill=255)
+        d.polygon([(w - 1, 0), (w - 1 - tail, 0), (w - 1 - tail, h - 1), (w - 1, h - 1),
+                   (w - 1 - int(tail * 0.5), h / 2)], fill=255)
+    else:  # pill
+        d.rounded_rectangle([0, 0, w - 1, h - 1], radius=radius, fill=255)
+    return mask
+
+
+def _paste_banner(layer, box, style, fill_rgb, border_rgb, radius, gradient=True):
+    """Draw a decorative banner: colored fill, border ring, gradient and shadow."""
+    x0, y0, x1, y1 = [int(v) for v in box]
+    w, h = max(1, x1 - x0), max(1, y1 - y0)
+    mask = _banner_mask(w, h, style, radius)
+    off = max(3, h // 16)
+    shadow = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    shadow.putalpha(mask.point(lambda a: int(a * 0.34)))
+    shadow = shadow.filter(ImageFilter.GaussianBlur(max(4, h // 10)))
+    layer.alpha_composite(shadow, (x0 + off, y0 + off))
+    border_img = Image.new("RGBA", (w, h), tuple(border_rgb) + (255,))
+    border_img.putalpha(mask)
+    layer.alpha_composite(border_img, (x0, y0))
+    bw = max(3, int(h * 0.05))
+    inner = mask.filter(ImageFilter.MinFilter(bw * 2 + 1))
+    if gradient:
+        fill = _vgradient((w, h), fill_rgb, _darken(fill_rgb, 0.85)).convert("RGBA")
+    else:
+        fill = Image.new("RGBA", (w, h), tuple(fill_rgb) + (255,))
+    fill.putalpha(inner)
+    layer.alpha_composite(fill, (x0, y0))
+
+
 def build_cover(
     front_art: Image.Image,
     out_path: str | Path,
@@ -314,6 +366,9 @@ def build_cover(
     rich_title=True,
     banner_color="#FFFFFF",
     banner_alpha=210,
+    banner_style="scallop",
+    banner_border=None,
+    banner_text_color=None,
     thumbnails: list | None = None,
     count_badge: str | None = None,
     logo: Image.Image | None = None,
@@ -362,13 +417,15 @@ def build_cover(
     bw = bx1 - bx0
     barcode_w, barcode_h = specs["cover"]["barcode_clear_in"]
 
+    b_fill = _hex(banner_color)
+    b_border = _hex(banner_border) if banner_border else _darken(b_fill, 0.6)
+    b_txt = _hex(banner_text_color) if banner_text_color else (tcol if _lum(b_fill) > 0.6 else (255, 255, 255))
     blurb_bottom = by0
     if blurb:
         bfont, blines, blh = _fit_block(tdraw, blurb, font_body, bw - px(0.5), px(2.2), int(bw * 0.055))
         panel_h = len(blines) * blh + px(0.4)
-        tdraw.rounded_rectangle([bx0, by0, bx1, by0 + panel_h], radius=px(0.16),
-                                fill=_hex(banner_color) + (215,))
-        _draw_lines(tdraw, blines, bfont, blh, bcx, by0 + px(0.2), tcol + (255,))
+        _paste_banner(text, [bx0, by0, bx1, by0 + panel_h], "pill", b_fill, b_border, px(0.16))
+        _draw_lines(tdraw, blines, bfont, blh, bcx, by0 + px(0.2), b_txt + (255,))
         blurb_bottom = by0 + panel_h
 
     if thumbnails:
@@ -416,14 +473,17 @@ def build_cover(
         band_lines.append((alines, afont, alh))
     if band_lines:
         pad = px(0.18)
+        extra = px(0.22) if banner_style == "scallop" else 0
         content_h = sum(len(l) * lh2 for l, _, lh2 in band_lines) + (len(band_lines) - 1) * px(0.05)
         band_bottom = H - px(reg["bleed_in"] + safe)
-        band_top = band_bottom - content_h - 2 * pad
-        tdraw.rounded_rectangle([fx0, band_top, fx1, band_bottom], radius=px(0.16),
-                                fill=_hex(banner_color) + (int(banner_alpha),))
-        y = band_top + pad
+        band_top = band_bottom - content_h - 2 * pad - extra
+        b_fill = _hex(banner_color)
+        b_border = _hex(banner_border) if banner_border else _darken(b_fill, 0.6)
+        _paste_banner(text, [fx0, band_top, fx1, band_bottom], banner_style, b_fill, b_border, px(0.16))
+        b_txt = _hex(banner_text_color) if banner_text_color else (tcol if _lum(b_fill) > 0.6 else (255, 255, 255))
+        y = band_top + pad + extra
         for lines2, font2, lh2 in band_lines:
-            y = _draw_lines(tdraw, lines2, font2, lh2, fcx, y, tcol + (255,)) + px(0.05)
+            y = _draw_lines(tdraw, lines2, font2, lh2, fcx, y, b_txt + (255,)) + px(0.05)
 
     if count_badge:
         r = px(0.7)
