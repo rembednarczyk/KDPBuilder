@@ -72,14 +72,49 @@ Inside the book:
 - One design per page, printed single sided so markers do not bleed through.
 - Large 8.5 x 11 inch pages.
 
-Why kids and parents love it:
-- Easy shapes build confidence and keep coloring fun, not frustrating.
-- Coloring supports fine motor skills and hand-eye coordination.
-- A calm, screen-free activity for home, travel, or the classroom.
+What it does for your child:
+- Builds fine motor skills, hand-eye coordination and precision.
+- Encourages patience and focus, and calms kids down after a busy day.
+- Simple shapes are easy to finish, so children feel a sense of success.
 
-A great gift for any child who loves cute animals and the ocean. Grab your
-crayons and start coloring.
+The axolotl lives in just one lake in Mexico, so coloring comes with a fun fact
+about a rare little animal. A great gift for any child who loves cute animals
+and the ocean. Sit down together, grab your crayons and start coloring.
 ```
+
+Added from the competitor analysis, in our own words: fine motor skills,
+hand-eye coordination, precision, patience and focus, calming down, a sense of
+success, the Mexican-axolotl fact, and coloring together.
+
+## Story-angle variant (A/B test)
+
+An alternative description that frames the book as one axolotl's day. Same
+keywords, gentler narrative, still no hype.
+
+```
+Meet a little axolotl who lives in an underwater world full of plants and
+bubbles. On every page it does something new: it swims among the lilies, rests
+on a rock, sips from a teacup, wears a crown and floats up with balloons. Your
+child colors the moments of its day and makes up the rest of the story.
+
+40 designs, bold outlines and large open areas, one design per page with a blank
+back so markers do not bleed through. Large 8.5 x 11 inch pages. For kids ages 4
+to 8 who love cute animals and the ocean.
+```
+
+## Back-cover blurbs (variants)
+
+Short options for the back cover; pick or rotate.
+
+1. 40 cute axolotls to color, with thick outlines and big open areas for small
+   hands. Coloring builds fine motor skills and calms kids down, and easy shapes
+   give a sense of success.
+2. Meet the happy axolotls of the underwater world. 40 designs with bold lines
+   and large areas, one per page. Grab your crayons and color together.
+3. 40 designs starring the axolotl, a rare animal that lives in just one lake in
+   Mexico. Bold outlines, big areas, easy for little hands. A lovely gift.
+4. The perfect gift for a young animal lover. 40 axolotls to color, bold lines,
+   large areas, single-sided pages.
 
 ## Categories (KDP)
 

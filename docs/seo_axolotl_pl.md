@@ -124,6 +124,36 @@ wyciszenie po przedszkolu, poczucie sukcesu bez frustracji, ciekawostka o
 aksolotku meksykańskim oraz wspólne kolorowanie z rodziną. Świadomie pomijamy
 frazesy konkurencji (pytania-haczyki, "absolutny hit", "pełna magii podróż").
 
+## Wariant z historią (do testów A/B)
+
+Alternatywny opis, który ujmuje książkę jako jeden dzień aksolotka. Te same
+słowa kluczowe, łagodna narracja, dalej bez sztucznego napięcia.
+
+```
+Poznaj małego aksolotka, który mieszka w podwodnym świecie pełnym roślin i
+bąbelków. Na każdej stronie robi coś innego: pływa wśród lilii, odpoczywa na
+kamieniu, pije herbatę z filiżanki, zakłada koronę i puszcza balony. Twoje
+dziecko koloruje kolejne chwile z jego dnia i samo dopowiada resztę historii.
+
+40 wzorów, grube kontury i duże pola, jeden wzór na stronie z pustą stroną z
+tyłu, żeby mazaki nie przebijały. Format 8,5 x 11 cala. Dla dzieci 4-8 lat,
+które lubią urocze zwierzątka i morski świat.
+```
+
+## Blurby na okładkę (warianty)
+
+Krótkie teksty na tył okładki. Wybierz jeden albo rotuj między tytułami.
+
+1. 40 uroczych aksolotków do kolorowania. Grube kontury i duże pola, idealne dla
+   małych dłoni. Kolorowanie ćwiczy motorykę małą i wycisza, a proste kształty
+   dają poczucie sukcesu.
+2. Poznaj wesołe aksolotki w podwodnym świecie. 40 wzorów z grubą kreską i dużymi
+   polami, po jednym na stronie. Chwyćcie kredki i kolorujcie razem.
+3. 40 wzorów z aksolotkiem meksykańskim, zwierzątkiem, które żyje tylko w jednym
+   jeziorze. Grube kontury i duże pola, łatwe dla małych rąk. Świetny prezent.
+4. Idealny prezent dla małego miłośnika zwierząt. 40 aksolotków do kolorowania,
+   grube linie, duże pola, druk jednostronny z pustą stroną z tyłu.
+
 ## Kategorie KDP (propozycja)
 
 Wybierz kategorie zbieżne z konkurencją. KDP pozwala wskazać do trzech kategorii
