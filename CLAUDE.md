@@ -39,6 +39,7 @@ python -m kdpbuilder.cli catalog
 python -m kdpbuilder.cli book-prompts --theme axolotl --age 5-6 --style kawaii --count 40 --format csv --out prompts.csv
 python -m kdpbuilder.cli generate --out raw/ --prompts prompts.csv --trim 8.5x11 --image-size 4K
 python -m kdpbuilder.cli build raw/ --out interior.pdf --trim 8.5x11 --thicken 1 --strict
+python -m kdpbuilder.cli scan interior.pdf --trim 8.5x11
 python -m kdpbuilder.cli cover --out cover.pdf --trim 8.5x11 --pages 80 --theme axolotl --generate-front --title "..." --author "Kolorowe Skarby"
 python -m pytest
 ```

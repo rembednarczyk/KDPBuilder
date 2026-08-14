@@ -43,19 +43,16 @@ wyszukiwania, więc nie tłumacz fraz jeden do jednego.
   lista frazowa, mapowanie na tytuł i tagi), żeby był powtarzalny dla kolejnych
   tytułów, a nie jednorazowy.
 
-### Pixel-perfect skaner PDF (do oceny i budowy)
+### Pixel-perfect skaner PDF
 
-- [ ] Skaner renderujący każdą stronę do pikseli i sprawdzający głębiej niż
-  obecny walidator. Wykonalne. Realne kontrole:
-  - czystość: piksele naprawdę czysto czarne i czysto białe, bez szarości;
-  - grubość linii: transformata odległości na czerni, minimalna szerokość kreski
-    w px przeliczona na punkty (kontrola min 0,75 pkt);
-  - drobne artefakty: małe spójne komponenty (kropki, śmieci) do usunięcia;
-  - strefa bezpieczna i krawędzie: brak tuszu w marginesie, a przy spadzie grafika
-    dochodzi do krawędzi;
-  - zamknięte kontury: wypełnienie zalewowe od zewnątrz i wykrywanie nieszczelnych
-    obszarów (trudniejsze, ale osiągalne, do walidacji na przykładach).
-  Stack: PyMuPDF do renderu, numpy do analizy. Wynik jako raport per strona.
+- [x] Skaner `scan` analizujący rzeczywiste piksele osadzonych obrazów
+  (`kdpbuilder/scan.py`, komenda `scan`). Kontrole: czystość (szarość z dala od
+  krawędzi, ignoruje antyaliasing), grubość linii przez transformatę odległości
+  (min 0,75 pkt), drobne artefakty (spójne komponenty), tusz w marginesie.
+  Stack: PyMuPDF + numpy + scipy. Sprawdzony na realnym wnętrzu: PASS.
+- [ ] Zamknięte kontury: obecnie tylko słaby proxy (liczba zamkniętych obszarów).
+  Do dopracowania: pewniejsze wykrywanie nieszczelności konturów, walidacja na
+  przykładach z celowymi przerwami.
 
 ### Pipeline i jakość
 

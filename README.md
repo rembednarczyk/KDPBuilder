@@ -128,6 +128,22 @@ Każdy wzór trafia na stronę w dokładnym formacie KDP, przy 300 DPI, z pustą
 stroną z tyłu (druk jednostronny). Dla grafiki sięgającej krawędzi dodaj
 `--bleed` (strona = format + spad, wzór wypełnia do brzegu).
 
+### Skan pikselowy (głębsza kontrola)
+
+Komenda `scan` analizuje rzeczywiste piksele osadzonych obrazów w gotowym PDF,
+głębiej niż walidator zgodności:
+
+```bash
+python -m kdpbuilder.cli scan interior.pdf --trim 8.5x11
+```
+
+Sprawdza: czystość (szarość z dala od krawędzi, czyli realne cieniowanie, a nie
+antyaliasing), grubość linii w punktach (transformata odległości, kontrola min
+0,75 pkt), drobne artefakty (małe spójne komponenty), tusz w marginesie oraz
+liczbę zamkniętych obszarów (proxy konturów, eksperymentalne). `--json` daje
+wynik maszynowy, `--page-data` dokłada dane per strona. To uzupełnienie walidatora,
+nie zamiennik; ręczny przegląd stron dalej obowiązuje.
+
 ### Okładka (pełny wrap)
 
 Moduł `cover` składa okładkę paperback KDP do jednego PDF: tył, grzbiet i przód
