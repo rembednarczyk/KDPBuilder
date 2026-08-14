@@ -100,6 +100,69 @@ def _draw_lines_outlined(odraw, lines, font, line_h, cx, top, fill, outline, ow,
     return y
 
 
+def _darken(rgb, f):
+    return tuple(max(0, min(255, int(c * f))) for c in rgb)
+
+
+def _vgradient(size, top_rgb, bot_rgb):
+    w, h = size
+    ramp = np.linspace(0, 1, max(1, h))[:, None]
+    col = (np.array(top_rgb) * (1 - ramp) + np.array(bot_rgb) * ramp).astype("uint8")
+    return Image.fromarray(np.repeat(col[:, None, :], max(1, w), axis=1), "RGB")
+
+
+def _rich_title(layer, lines, font, line_h, cx, top, grad_top, grad_bottom,
+                inner_rgba, outer_rgba, gloss=True):
+    """Render a lavish title: gradient faces, double outline, gloss and a soft
+    3D drop shadow, composited onto an RGBA layer. Correct spelling stays with
+    us (this is typography, not AI-baked text)."""
+    measure = ImageDraw.Draw(Image.new("L", (1, 1)))
+    block_w = max((int(measure.textlength(l, font=font)) for l in lines), default=1)
+    ow_outer = max(3, int(font.size * 0.15))
+    ow_inner = max(2, int(font.size * 0.07))
+    pad = ow_outer * 2 + int(font.size * 0.35)
+    W = block_w + pad * 2
+    Hs = int(len(lines) * line_h) + pad * 2
+
+    def positions():
+        y = pad
+        for l in lines:
+            w = measure.textlength(l, font=font)
+            yield l, (W / 2 - w / 2, y)
+            y += line_h
+
+    sprite = Image.new("RGBA", (W, Hs), (0, 0, 0, 0))
+    sd = ImageDraw.Draw(sprite)
+    for l, (x, y) in positions():  # outer (white) outline
+        sd.text((x, y), l, font=font, fill=outer_rgba, stroke_width=ow_outer, stroke_fill=outer_rgba)
+    for l, (x, y) in positions():  # inner (dark) outline
+        sd.text((x, y), l, font=font, fill=inner_rgba, stroke_width=ow_inner, stroke_fill=inner_rgba)
+
+    face = Image.new("L", (W, Hs), 0)
+    fd = ImageDraw.Draw(face)
+    for l, (x, y) in positions():
+        fd.text((x, y), l, font=font, fill=255)
+    grad = _vgradient((W, Hs), grad_top, grad_bottom).convert("RGBA")
+    grad.putalpha(face)
+    sprite = Image.alpha_composite(sprite, grad)
+
+    if gloss:
+        fmask = np.asarray(face, dtype="float32") / 255.0
+        yr = np.clip(1 - np.arange(Hs)[:, None] / (Hs * 0.5), 0, 1)  # bright at top
+        gm = (fmask * yr * 150).astype("uint8")
+        gimg = Image.new("RGBA", (W, Hs), (255, 255, 255, 0))
+        gimg.putalpha(Image.fromarray(gm, "L"))
+        sprite = Image.alpha_composite(sprite, gimg)
+
+    shadow = Image.new("RGBA", (W, Hs), (0, 0, 0, 0))
+    shadow.putalpha(sprite.split()[-1].point(lambda a: int(a * 0.42)))
+    shadow = shadow.filter(ImageFilter.GaussianBlur(max(4, int(font.size * 0.06))))
+    off = max(3, int(font.size * 0.06))
+    ox, oy = int(cx - W / 2), int(top - pad)
+    layer.alpha_composite(shadow, (ox + off, oy + off))
+    layer.alpha_composite(sprite, (ox, oy))
+
+
 def _fill_cover(art: Image.Image, box_w, box_h) -> Image.Image:
     src = art.convert("RGB")
     scale = max(box_w / src.width, box_h / src.height)
@@ -227,6 +290,10 @@ def build_cover(
     title_color=None,
     title_fill="#FFFFFF",
     title_outline="#12303A",
+    title_outline2="#FFFFFF",
+    title_grad_top=None,
+    title_grad_bottom=None,
+    rich_title=True,
     banner_color="#FFFFFF",
     banner_alpha=210,
     thumbnails: list | None = None,
@@ -305,11 +372,17 @@ def build_cover(
     tit_outline = _hex(title_outline) + (255,)
 
     if title:
-        font, lines, lh = _fit_block(tdraw, title, font_title, fw, px(2.6), int(fw * 0.24))
-        ow = max(2, int(font.size * 0.09))
-        soff = max(2, int(font.size * 0.06))
-        _draw_lines_outlined(tdraw, lines, font, lh, fcx, px(reg["bleed_in"] + safe),
-                             tit_fill, tit_outline, ow, soff)
+        font, lines, lh = _fit_block(tdraw, title, font_title, fw, px(2.6), int(fw * 0.22))
+        if rich_title:
+            g_top = _hex(title_grad_top) if title_grad_top else _hex(title_fill or "#FFE14D")
+            g_bot = _hex(title_grad_bottom) if title_grad_bottom else _darken(g_top, 0.72)
+            _rich_title(text, lines, font, lh, fcx, px(reg["bleed_in"] + safe),
+                        g_top, g_bot, _hex(title_outline) + (255,), _hex(title_outline2) + (255,))
+        else:
+            ow = max(2, int(font.size * 0.09))
+            soff = max(2, int(font.size * 0.06))
+            _draw_lines_outlined(tdraw, lines, font, lh, fcx, px(reg["bleed_in"] + safe),
+                                 tit_fill, tit_outline, ow, soff)
 
     # Subtitle and author use the rounded title font so the front reads as one
     # cohesive playful design; the back blurb stays in the body font for reading.
