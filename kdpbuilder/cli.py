@@ -175,6 +175,11 @@ def cmd_cover(args) -> int:
         except RuntimeError as e:
             sys.stderr.write(str(e) + "\n")
             return 2
+    banner_assets = {}
+    for slot, path in (("subtitle", args.subtitle_asset), ("blurb", args.blurb_asset)):
+        if path and Path(path).exists():
+            banner_assets[slot] = kcover.load_logo_image(path)
+    banner_assets = banner_assets or None
     thumbs = None
     if args.thumbs:
         tdir = Path(args.thumbs)
@@ -190,7 +195,7 @@ def cmd_cover(args) -> int:
             title_grad_bottom=args.title_grad_bottom, rich_title=not args.no_rich_title,
             banner_color=args.banner, banner_alpha=args.banner_alpha,
             banner_style=args.banner_style, banner_border=args.banner_border,
-            banner_text_color=args.banner_text,
+            banner_text_color=args.banner_text, banner_assets=banner_assets,
             thumbnails=thumbs, count_badge=args.count_badge,
             logo=logo_img,
             logo_where=args.logo_where, logo_height_in=args.logo_height,
@@ -442,6 +447,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="Subtitle banner shape.")
     p.add_argument("--banner-border", default=None, help="Banner border color (hex); defaults to a darker fill.")
     p.add_argument("--banner-text", default=None, help="Banner text color (hex); auto-contrast by default.")
+    p.add_argument("--subtitle-asset", default=None, help="Decoration asset (SVG/PNG) for the subtitle banner slot.")
+    p.add_argument("--blurb-asset", default=None, help="Decoration asset (SVG/PNG) for the back blurb slot.")
     p.add_argument("--thumbs", default=None, help="Folder of interior images to show as back-cover thumbnails.")
     p.add_argument("--count-badge", default=None, help="Text for the front count sticker, e.g. '40 wzorow'.")
     p.add_argument("--logo", default=None, help="Publisher logo (SVG or transparent PNG). Defaults to the bundled Kolorowe Skarby logo.")

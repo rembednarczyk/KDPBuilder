@@ -82,6 +82,20 @@ def test_wraparound_with_thumbnails(tmp_path, specs, front):
     assert pymupdf.open(out).page_count == 1
 
 
+def test_banner_asset_slot(tmp_path, specs, front):
+    # a decoration asset dropped into the subtitle slot is used instead of the
+    # procedural banner; text still composits on top.
+    asset = Image.new("RGBA", (800, 200), (200, 40, 120, 255))
+    out = tmp_path / "asset.pdf"
+    summary = kcover.build_cover(
+        front, out, trim="8.5x11", page_count=80, paper="bw_white",
+        title="Aksolotki", subtitle="Kolorowanka dla dzieci",
+        banner_assets={"subtitle": asset}, dpi=120, specs=specs,
+    )
+    assert summary["spine_text"] == "included"
+    assert pymupdf.open(out).page_count == 1
+
+
 def test_logo_placed(tmp_path, specs, front):
     logo = Image.new("RGBA", (400, 200), (0, 0, 0, 0))
     ImageDraw.Draw(logo).rounded_rectangle((10, 10, 390, 190), radius=30, fill=(255, 0, 0, 255))

@@ -322,6 +322,11 @@ def _banner_mask(w, h, style, radius):
     return mask
 
 
+def _fit_asset_to_box(asset, w, h):
+    """Resize a decoration asset (transparent PNG/SVG) to fill a slot box."""
+    return asset.convert("RGBA").resize((max(1, int(w)), max(1, int(h))), Image.LANCZOS)
+
+
 def _paste_banner(layer, box, style, fill_rgb, border_rgb, radius, gradient=True):
     """Draw a decorative banner: colored fill, border ring, gradient and shadow."""
     x0, y0, x1, y1 = [int(v) for v in box]
@@ -369,6 +374,7 @@ def build_cover(
     banner_style="scallop",
     banner_border=None,
     banner_text_color=None,
+    banner_assets: dict | None = None,
     thumbnails: list | None = None,
     count_badge: str | None = None,
     logo: Image.Image | None = None,
@@ -421,10 +427,14 @@ def build_cover(
     b_border = _hex(banner_border) if banner_border else _darken(b_fill, 0.6)
     b_txt = _hex(banner_text_color) if banner_text_color else (tcol if _lum(b_fill) > 0.6 else (255, 255, 255))
     blurb_bottom = by0
+    assets = banner_assets or {}
     if blurb:
         bfont, blines, blh = _fit_block(tdraw, blurb, font_body, bw - px(0.5), px(2.2), int(bw * 0.055))
         panel_h = len(blines) * blh + px(0.4)
-        _paste_banner(text, [bx0, by0, bx1, by0 + panel_h], "pill", b_fill, b_border, px(0.16))
+        if assets.get("blurb") is not None:  # drop a decoration asset into the slot
+            text.alpha_composite(_fit_asset_to_box(assets["blurb"], bx1 - bx0, panel_h), (int(bx0), int(by0)))
+        else:
+            _paste_banner(text, [bx0, by0, bx1, by0 + panel_h], "pill", b_fill, b_border, px(0.16))
         _draw_lines(tdraw, blines, bfont, blh, bcx, by0 + px(0.2), b_txt + (255,))
         blurb_bottom = by0 + panel_h
 
@@ -479,7 +489,11 @@ def build_cover(
         band_top = band_bottom - content_h - 2 * pad - extra
         b_fill = _hex(banner_color)
         b_border = _hex(banner_border) if banner_border else _darken(b_fill, 0.6)
-        _paste_banner(text, [fx0, band_top, fx1, band_bottom], banner_style, b_fill, b_border, px(0.16))
+        if assets.get("subtitle") is not None:  # decoration asset in the subtitle slot
+            text.alpha_composite(_fit_asset_to_box(assets["subtitle"], fx1 - fx0, band_bottom - band_top),
+                                 (int(fx0), int(band_top)))
+        else:
+            _paste_banner(text, [fx0, band_top, fx1, band_bottom], banner_style, b_fill, b_border, px(0.16))
         b_txt = _hex(banner_text_color) if banner_text_color else (tcol if _lum(b_fill) > 0.6 else (255, 255, 255))
         y = band_top + pad + extra
         for lines2, font2, lh2 in band_lines:
