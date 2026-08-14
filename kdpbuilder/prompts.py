@@ -156,6 +156,35 @@ def build_cover_prompt(theme: str, extra: list[str] | None = None, lib: dict | N
     }
 
 
+def list_decorations(lib=None):
+    lib = lib or load_prompt_lib()
+    return [v["key"] for v in lib["decoration_assets"]["variants"]]
+
+
+def build_decoration_prompt(key: str, extra: list[str] | None = None, lib: dict | None = None) -> dict:
+    """Prompt for one decorative backing asset (banner/ribbon/frame, no text)."""
+    lib = lib or load_prompt_lib()
+    deco = lib["decoration_assets"]
+    variant = next((v for v in deco["variants"] if v["key"] == key), None)
+    if variant is None:
+        raise PromptError("Unknown decoration '%s'. Known: %s" % (key, ", ".join(list_decorations(lib))))
+    pos = [variant["subject"]] + list(deco["core"])
+    if extra:
+        pos += extra
+    return {
+        "key": key,
+        "subject": variant["subject"],
+        "prompt": ", ".join(_dedupe(pos)),
+        "negative_prompt": ", ".join(_dedupe(deco["negative"])),
+    }
+
+
+def build_decorations(lib: dict | None = None) -> list[dict]:
+    """Prompts for every decorative backing variant."""
+    lib = lib or load_prompt_lib()
+    return [build_decoration_prompt(k, lib=lib) for k in list_decorations(lib)]
+
+
 def build_book(
     theme: str,
     age: str,

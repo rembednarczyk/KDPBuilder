@@ -243,6 +243,34 @@ def cmd_keywords(args) -> int:
     return 0
 
 
+def cmd_decorations(args) -> int:
+    lib = prompts.load_prompt_lib()
+    try:
+        items = [prompts.build_decoration_prompt(args.key, lib=lib)] if args.key \
+            else prompts.build_decorations(lib=lib)
+    except prompts.PromptError as e:
+        sys.stderr.write(str(e) + "\n")
+        return 2
+    if args.format == "csv":
+        import csv
+        import io
+
+        buf = io.StringIO()
+        w = csv.writer(buf)
+        w.writerow(["key", "prompt", "negative_prompt"])
+        for it in items:
+            w.writerow([it["key"], it["prompt"], it["negative_prompt"]])
+        text = buf.getvalue()
+    else:
+        text = json.dumps(items, indent=2, ensure_ascii=False)
+    if args.out:
+        Path(args.out).write_text(text, encoding="utf-8")
+        print("Wrote %d decoration prompt(s) to %s" % (len(items), args.out))
+    else:
+        print(text)
+    return 0
+
+
 def cmd_catalog(args) -> int:
     lib = prompts.load_prompt_lib()
     out = {
@@ -480,6 +508,12 @@ def build_parser() -> argparse.ArgumentParser:
                    help="Pack the phrases into the 7 KDP keyword fields and print them.")
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_keywords)
+
+    p = sub.add_parser("decorations", help="Prompts for decorative cover backing assets (banners, frames).")
+    p.add_argument("--key", default=None, help="One variant key; omit for all.")
+    p.add_argument("--format", choices=["json", "csv"], default="json")
+    p.add_argument("--out", help="Write to this file instead of stdout.")
+    p.set_defaults(func=cmd_decorations)
 
     p = sub.add_parser("catalog", help="List available themes, age groups, styles and seasons.")
     p.set_defaults(func=cmd_catalog)

@@ -30,6 +30,17 @@ def test_new_themes_present(lib):
         assert key in prompts.list_themes(lib)
 
 
+def test_decoration_prompts(lib):
+    keys = prompts.list_decorations(lib)
+    assert len(keys) >= 8
+    for d in prompts.build_decorations(lib=lib):
+        assert "no text" in d["prompt"]
+        assert "plain solid white background" in d["prompt"]
+        assert "text" in d["negative_prompt"]
+    with pytest.raises(prompts.PromptError):
+        prompts.build_decoration_prompt("nope", lib=lib)
+
+
 def test_core_and_negatives_always_present(lib):
     pair = prompts.build_pair("cute axolotl", age="5-6", style="kawaii", lib=lib)
     assert "coloring page" in pair["prompt"]
