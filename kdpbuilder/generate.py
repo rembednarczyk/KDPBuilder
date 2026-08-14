@@ -25,7 +25,7 @@ from pathlib import Path
 # gemini-3.1-flash-lite-image = cheapest flash image
 # These use the generate_content API. Imagen models (imagen-4.0-*) use a
 # different predict API and are not supported by this backend.
-DEFAULT_MODEL = os.environ.get("GEMINI_IMAGE_MODEL", "gemini-3-pro-image")
+DEFAULT_MODEL = os.environ.get("GEMINI_IMAGE_MODEL", "gemini-3.1-flash-image")
 
 SUPPORTED_ASPECT = ["1:1", "2:3", "3:2", "3:4", "4:3", "9:16", "16:9", "21:9"]
 SUPPORTED_SIZES = ["1K", "2K", "4K"]

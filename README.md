@@ -128,6 +128,28 @@ Każdy wzór trafia na stronę w dokładnym formacie KDP, przy 300 DPI, z pustą
 stroną z tyłu (druk jednostronny). Dla grafiki sięgającej krawędzi dodaj
 `--bleed` (strona = format + spad, wzór wypełnia do brzegu).
 
+### Okładka (pełny wrap)
+
+Moduł `cover` składa okładkę paperback KDP do jednego PDF: tył, grzbiet i przód
+ze spadem. Szerokość grzbietu liczona z liczby stron i grubości papieru
+(`specs`). Grafika przodu jest kolorowa i bez tekstu; tytuł składany jest przez
+moduł, nie wypalany w grafice AI.
+
+```bash
+# z gotową grafiką przodu
+python -m kdpbuilder.cli cover --out cover.pdf --trim 8.5x11 --pages 80 --paper bw_white \
+  --front front.png --title "Aksolotki" --subtitle "Wielka kolorowanka dla dzieci 3-6 lat" \
+  --author "Twoja Marka" --blurb "Tekst na tył okładki." --bg "#9BE0E6"
+
+# albo z generacją grafiki przodu przez Gemini
+python -m kdpbuilder.cli cover --out cover.pdf --trim 8.5x11 --pages 80 \
+  --theme axolotl --generate-front --image-size 4K --title "Aksolotki" --author "Twoja Marka"
+```
+
+Tekst na grzbiecie pojawia się tylko od 79 stron (wymóg KDP). Kolory `--bg`,
+`--text`, `--title-color` podajesz jako hex. Zawsze potwierdź finalny grzbiet w
+kalkulatorze okładki KDP przed wgraniem, bo grubość papieru bywa aktualizowana.
+
 ### Bramka: walidacja
 
 ```bash

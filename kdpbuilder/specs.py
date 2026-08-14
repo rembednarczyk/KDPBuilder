@@ -83,5 +83,59 @@ def recommended_dpi(specs: dict) -> int:
     return int(specs["resolution"]["recommended_min_dpi"])
 
 
+# ----------------------------------------------------------------------------
+# Cover geometry
+# ----------------------------------------------------------------------------
+
+def paper_thickness_in(specs: dict, paper: str) -> float:
+    table = specs["cover"]["paper_thickness_in"]
+    if paper not in table:
+        raise SpecError("No cover paper thickness for '%s'." % paper)
+    return float(table[paper])
+
+
+def spine_width_in(specs: dict, page_count: int, paper: str) -> float:
+    """Spine width in inches: page count times per-page paper thickness."""
+    return page_count * paper_thickness_in(specs, paper)
+
+
+def spine_text_allowed(specs: dict, page_count: int) -> bool:
+    return page_count >= int(specs["cover"]["min_pages_for_spine_text"])
+
+
+def full_cover_size_in(specs: dict, trim_key: str, page_count: int, paper: str) -> tuple[float, float]:
+    """Full wrap cover size in inches (back + spine + front, plus bleed).
+
+    width  = 2*bleed + 2*trim_width + spine
+    height = trim_height + 2*bleed
+    """
+    t = trim(specs, trim_key)
+    tw, th = float(t["w"]), float(t["h"])
+    bleed = float(specs["cover"]["bleed_each_edge_in"])
+    spine = spine_width_in(specs, page_count, paper)
+    return (2 * bleed + 2 * tw + spine, th + 2 * bleed)
+
+
+def cover_regions_in(specs: dict, trim_key: str, page_count: int, paper: str) -> dict:
+    """X boundaries (inches from the left) of back, spine and front panels."""
+    t = trim(specs, trim_key)
+    tw = float(t["w"])
+    bleed = float(specs["cover"]["bleed_each_edge_in"])
+    spine = spine_width_in(specs, page_count, paper)
+    back_x0 = bleed
+    spine_x0 = bleed + tw
+    front_x0 = bleed + tw + spine
+    front_x1 = bleed + tw + spine + tw
+    return {
+        "bleed_in": bleed,
+        "trim_w_in": tw,
+        "spine_w_in": spine,
+        "back_x0": back_x0,
+        "spine_x0": spine_x0,
+        "front_x0": front_x0,
+        "front_x1": front_x1,
+    }
+
+
 def paper_types(specs: dict) -> list[str]:
     return list(specs["paper_types"])

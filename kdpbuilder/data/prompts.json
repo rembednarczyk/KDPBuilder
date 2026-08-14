@@ -192,5 +192,33 @@
 
   "consistency": {
     "note": "For one book, keep theme, age group and style fixed and vary only the scene. Reuse the same image-model seed or style reference across pages so the character of the line stays constant (workflow step 2). Generate a few pages first, confirm one consistent look, then generate the rest."
+  },
+
+  "cover_style": {
+    "positive": [
+      "full color children's book cover illustration",
+      "vibrant cheerful colors",
+      "cute kawaii character",
+      "bold clean shapes",
+      "one friendly character centered in the lower two thirds",
+      "simple soft background",
+      "large clear empty space across the top for a title",
+      "eye-catching",
+      "polished professional illustration"
+    ],
+    "negative": [
+      "text",
+      "letters",
+      "words",
+      "title",
+      "typography",
+      "watermark",
+      "signature",
+      "frame",
+      "border",
+      "cluttered composition",
+      "busy background"
+    ],
+    "note": "Cover art is full color and carries no text. The title is typeset by the cover module, so leave headroom at the top and keep the character clear of the edges."
   }
 }

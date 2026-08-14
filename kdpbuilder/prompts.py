@@ -141,6 +141,21 @@ def build_pair(
     }
 
 
+def build_cover_prompt(theme: str, extra: list[str] | None = None, lib: dict | None = None) -> dict:
+    """Positive and negative prompt for full-color, text-free cover art."""
+    lib = lib or load_prompt_lib()
+    subject = _get(lib, "themes", theme)["subject_base"]
+    cover = lib["cover_style"]
+    pos = [subject] + list(cover["positive"])
+    if extra:
+        pos += extra
+    return {
+        "subject": subject,
+        "prompt": ", ".join(_dedupe(pos)),
+        "negative_prompt": ", ".join(_dedupe(cover["negative"])),
+    }
+
+
 def build_book(
     theme: str,
     age: str,

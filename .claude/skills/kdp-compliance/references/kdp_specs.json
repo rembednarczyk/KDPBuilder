@@ -37,6 +37,20 @@
     "blank_page_max_ink_fraction": 0.003,
     "comment": "Coloring books are printed single-sided: each design has a blank backing page so markers do not show through. 40 designs = 80 interior pages."
   },
+  "cover": {
+    "bleed_each_edge_in": 0.125,
+    "min_pages_for_spine_text": 79,
+    "spine_text_safe_in": 0.0625,
+    "barcode_clear_in": [2.0, 1.2],
+    "paper_thickness_in": {
+      "bw_white": 0.002252,
+      "bw_cream": 0.0025,
+      "bw_groundwood": 0.0038,
+      "standard_color": 0.002252,
+      "premium_color": 0.002347
+    },
+    "comment": "Full-cover width = 2*bleed + 2*trim_width + spine; full-cover height = trim_height + 2*bleed. spine = page_count * paper_thickness_in. Spine text is allowed only at or above min_pages_for_spine_text. barcode_clear_in is the back-cover bottom-right area to leave empty. Verify thickness and final spine against the KDP cover calculator before uploading; the groundwood value is approximate."
+  },
   "paper_types": ["bw_white", "bw_cream", "bw_groundwood", "standard_color", "premium_color"],
   "trim_sizes": {
     "6x9": {

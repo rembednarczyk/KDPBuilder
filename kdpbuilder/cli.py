@@ -19,6 +19,7 @@ from pathlib import Path
 from PIL import Image
 
 from . import assemble as kassemble
+from . import cover as kcover
 from . import generate as kgenerate
 from . import imageprep
 from . import prompts
@@ -138,6 +139,47 @@ def cmd_generate(args) -> int:
     print("Done. %d image(s) in %s" % (len(saved), args.out))
     print("Next: review each page, then clean and assemble:")
     print("  python -m kdpbuilder.cli build %s --out interior.pdf --trim %s" % (args.out, args.trim or "8.5x11"))
+    return 0
+
+
+def cmd_cover(args) -> int:
+    from PIL import Image
+
+    specs = kspecs.load_specs()
+    if args.front:
+        front = Image.open(args.front)
+    elif args.theme and args.generate_front:
+        lib = prompts.load_prompt_lib()
+        try:
+            pair = prompts.build_cover_prompt(args.theme, lib=lib)
+            backend = kgenerate.GeminiBackend(model=args.model, image_size=args.image_size)
+        except (prompts.PromptError, kgenerate.GenerateError) as e:
+            sys.stderr.write(str(e) + "\n")
+            return 2
+        t = kspecs.trim(specs, args.trim)
+        aspect = kgenerate.aspect_for(float(t["w"]), float(t["h"]))
+        print("Generating front cover art with %s..." % backend.model)
+        data = backend.generate(pair["prompt"], pair["negative_prompt"], aspect)
+        import io
+
+        front = Image.open(io.BytesIO(data))
+    else:
+        sys.stderr.write("Provide --front IMAGE, or --theme with --generate-front.\n")
+        return 2
+
+    try:
+        summary = kcover.build_cover(
+            front, out_path=args.out, trim=args.trim, page_count=args.pages, paper=args.paper,
+            title=args.title, subtitle=args.subtitle, author=args.author, blurb=args.blurb,
+            bg_color=args.bg, text_color=args.text, title_color=args.title_color,
+            font_title=args.font_title or kcover.DEFAULT_TITLE_FONT,
+            font_body=args.font_body or kcover.DEFAULT_BODY_FONT, specs=specs,
+        )
+    except Exception as e:
+        sys.stderr.write("Cover build failed: %s\n" % e)
+        return 2
+    print(json.dumps(summary, indent=2, ensure_ascii=False))
+    print("Confirm the spine (%s in) against the KDP cover calculator before uploading." % summary["spine_in"])
     return 0
 
 
@@ -295,6 +337,27 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--limit", type=int, default=None, help="Only generate the first N prompts.")
     p.add_argument("--no-resume", action="store_true", help="Regenerate even if a file exists.")
     p.set_defaults(func=cmd_generate)
+
+    p = sub.add_parser("cover", help="Build a full-wrap KDP paperback cover PDF.")
+    p.add_argument("--out", required=True, help="Output cover PDF path.")
+    p.add_argument("--trim", required=True, help="Trim key, e.g. 8.5x11.")
+    p.add_argument("--pages", type=int, required=True, help="Final interior page count (sets spine width).")
+    p.add_argument("--paper", default="bw_white")
+    p.add_argument("--title", default="", help="Cover title.")
+    p.add_argument("--subtitle", default=None)
+    p.add_argument("--author", default=None)
+    p.add_argument("--blurb", default=None, help="Back-cover text.")
+    p.add_argument("--front", help="Front cover art image (color).")
+    p.add_argument("--theme", help="Theme to generate front art from (with --generate-front).")
+    p.add_argument("--generate-front", action="store_true", help="Generate front art via Gemini.")
+    p.add_argument("--image-size", default="4K", choices=kgenerate.SUPPORTED_SIZES)
+    p.add_argument("--model", default=None, help="Model for front art generation.")
+    p.add_argument("--bg", default="#FCE7A2", help="Background color (hex).")
+    p.add_argument("--text", default="#213241", help="Text color (hex).")
+    p.add_argument("--title-color", default=None, help="Title color (hex); defaults to text color.")
+    p.add_argument("--font-title", default=None, help="TTF path for the title.")
+    p.add_argument("--font-body", default=None, help="TTF path for body text.")
+    p.set_defaults(func=cmd_cover)
 
     p = sub.add_parser("catalog", help="List available themes, age groups, styles and seasons.")
     p.set_defaults(func=cmd_catalog)
