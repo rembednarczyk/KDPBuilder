@@ -13,7 +13,14 @@ indeksu. Pamięć projektu i reguły są w `../CLAUDE.md`.
   tytuł, podtytuł, 7 tagów, opis, kategorie.
 
 Narzędzie: `python -m kdpbuilder.cli keywords <pliki> --contains niche` wyciąga
-kandydackie frazy z częstością z zapisanych aukcji konkurencji.
+kandydackie frazy z częstością z zapisanych aukcji konkurencji. Przydatne flagi:
+`--segment` (tnie n-gramy na markupie, zalecane dla dumpów HTML), `--normalize`
+(skleja polską odmianę), `--csv plik.csv` (eksport z flagą 50 znaków KDP),
+`--pack phrases|dense` (pakuje w 7 pól słów kluczowych KDP). Uwaga: auto-pack
+potrafi wyciągnąć fragment tytułu konkurenta, więc przejrzyj wynik i wyrzuć
+cudze tytuły i marki. Funkcja `autocomplete()` (podpowiedzi Amazona) działa tylko
+lokalnie z `pip install ".[keywords]"`, nie z tego środowiska (proxy), i podlega
+ToS Amazona, więc używaj oszczędnie.
 
 ## Jak dodawać wiedzę
 

@@ -43,3 +43,49 @@ def test_en_language():
     ranked = kkw.mine([text], lang="en", min_count=2)
     phrases = _top_phrases(ranked)
     assert any("axolotl coloring" in p for p in phrases)
+
+
+def test_segment_breaks_ngrams_at_markup():
+    # On one line, markup between words must not form a cross-boundary bigram.
+    line = '<span class="csa">kolorowanka</span><div>dzieci</div>'
+    off = _top_phrases(kkw.mine([line], lang="pl", ngram=(2, 2), min_count=1))
+    on = _top_phrases(kkw.mine([line], lang="pl", ngram=(2, 2), min_count=1, segment=True))
+    assert any("kolorowanka dzieci" == p for p in off)      # adjacency without segmentation
+    assert not any("kolorowanka dzieci" == p for p in on)   # broken by the tags
+
+
+def test_normalize_groups_inflections():
+    text = "kolorowanka\nkolorowanki\nkolorowanek\nkolorowanka"
+    plain = dict(kkw.mine([text], lang="pl", ngram=(1, 1), min_count=1))
+    norm = dict(kkw.mine([text], lang="pl", ngram=(1, 1), min_count=1, normalize=True))
+    # plain keeps forms apart; normalize aggregates them under one surface form
+    assert max(norm.values()) >= 4
+    assert max(plain.values()) <= 2
+
+
+def test_pack_kdp_fields_phrases():
+    phrases = ["kolorowanka dla dzieci", "x" * 60, "aksolotl kawaii", "grube linie"]
+    fields = kkw.pack_kdp_fields(phrases, mode="phrases")
+    assert "kolorowanka dla dzieci" in fields
+    assert all(len(f) <= kkw.KDP_FIELD_LIMIT for f in fields)  # over-limit phrase skipped
+    assert len(fields) <= kkw.KDP_FIELD_COUNT
+
+
+def test_pack_kdp_fields_dense_dedupes():
+    phrases = ["kolorowanka dzieci", "dzieci prezent", "kolorowanka aksolotl"]
+    fields = kkw.pack_kdp_fields(phrases, mode="dense")
+    joined = " ".join(fields).split()
+    assert len(joined) == len(set(joined))  # no repeated tokens
+    assert all(len(f) <= kkw.KDP_FIELD_LIMIT for f in fields)
+
+
+def test_to_csv_flags_over_limit(tmp_path):
+    import csv
+
+    rows = [("short phrase", 5), ("y" * 55, 3)]
+    out = tmp_path / "k.csv"
+    kkw.to_csv(rows, out)
+    with open(out, encoding="utf-8-sig", newline="") as f:
+        data = list(csv.DictReader(f))
+    assert data[0]["over_kdp_limit"] == "False"
+    assert data[1]["over_kdp_limit"] == "True"

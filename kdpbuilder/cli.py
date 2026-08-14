@@ -195,13 +195,23 @@ def cmd_keywords(args) -> int:
         contains = [r.strip() for r in args.contains.split(",") if r.strip()]
     try:
         ranked = kkw.mine_files(args.files, lang=args.lang, ngram=(args.min_n, args.max_n),
-                                top=args.top, min_count=args.min_count, contains=contains)
+                                top=args.top, min_count=args.min_count, contains=contains,
+                                segment=args.segment, normalize=args.normalize)
     except FileNotFoundError as e:
         sys.stderr.write(str(e) + "\n")
         return 2
+    if args.csv:
+        kkw.to_csv(ranked, args.csv)
+        print("Wrote %d phrase(s) to %s" % (len(ranked), args.csv))
+    if args.pack:
+        fields = kkw.pack_kdp_fields([p for p, _ in ranked], mode=args.pack)
+        print("KDP keyword fields (%s):" % args.pack)
+        for i, f in enumerate(fields, 1):
+            print("%d. %s (%d chars)" % (i, f, len(f)))
+        return 0
     if args.json:
         print(json.dumps([{"phrase": p, "count": c} for p, c in ranked], indent=2, ensure_ascii=False))
-    else:
+    elif not args.csv:
         for p, c in ranked:
             print("%5d  %s" % (c, p))
     return 0
@@ -417,6 +427,13 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--contains", default=None,
                    help="Keep only phrases containing one of these roots (comma-separated), "
                         "or 'niche' for the built-in coloring-book roots. Use on HTML dumps.")
+    p.add_argument("--segment", action="store_true",
+                   help="Break n-grams at punctuation/markup (recommended for HTML dumps).")
+    p.add_argument("--normalize", action="store_true",
+                   help="Group Polish inflected forms so counts aggregate (lang pl).")
+    p.add_argument("--csv", default=None, help="Write results to this CSV (with a 50-char flag).")
+    p.add_argument("--pack", choices=["phrases", "dense"], default=None,
+                   help="Pack the phrases into the 7 KDP keyword fields and print them.")
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_keywords)
 
