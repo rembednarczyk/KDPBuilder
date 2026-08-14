@@ -22,43 +22,42 @@ from . import specs as kspecs
 def _compose_page_canvas(
     design: Image.Image,
     canvas_px: tuple[int, int],
-    margin_px: int,
+    margins_px: tuple[int, int, int, int],
     mode: str,
 ) -> Image.Image:
     """Render one full-page white canvas with the design placed on it.
 
-    mode 'fit' scales the design inside the margin box and centers it (for
-    no-bleed interiors). mode 'fill' covers the whole page edge to edge and
-    crops the overflow (for bleed pages where art reaches the trim).
+    margins_px is (left, right, top, bottom). mode 'fit' scales the design
+    inside that box and centers it there (so an asymmetric gutter shifts the
+    design toward the outer edge). mode 'fill' covers the whole page edge to
+    edge and crops the overflow (for bleed pages where art reaches the trim).
     """
     cw, ch = canvas_px
     canvas = Image.new("L", (cw, ch), 255)
     src = design.convert("L")
 
     if mode == "fill":
-        box_w, box_h = cw, ch
-        off_x, off_y = 0, 0
-        scale = max(box_w / src.width, box_h / src.height)
+        scale = max(cw / src.width, ch / src.height)
         new = src.resize(
             (max(1, round(src.width * scale)), max(1, round(src.height * scale))),
             Image.LANCZOS,
         )
-        left = (new.width - box_w) // 2
-        top = (new.height - box_h) // 2
-        new = new.crop((left, top, left + box_w, top + box_h))
-        canvas.paste(new, (off_x, off_y))
+        left = (new.width - cw) // 2
+        top = (new.height - ch) // 2
+        canvas.paste(new.crop((left, top, left + cw, top + ch)), (0, 0))
         return canvas
 
-    # fit
-    box_w = max(1, cw - 2 * margin_px)
-    box_h = max(1, ch - 2 * margin_px)
+    # fit inside the (possibly asymmetric) margin box
+    ml, mr, mt, mb = margins_px
+    box_w = max(1, cw - ml - mr)
+    box_h = max(1, ch - mt - mb)
     scale = min(box_w / src.width, box_h / src.height)
     new = src.resize(
         (max(1, round(src.width * scale)), max(1, round(src.height * scale))),
         Image.LANCZOS,
     )
-    off_x = (cw - new.width) // 2
-    off_y = (ch - new.height) // 2
+    off_x = ml + (box_w - new.width) // 2
+    off_y = mt + (box_h - new.height) // 2
     canvas.paste(new, (off_x, off_y))
     return canvas
 
@@ -79,12 +78,15 @@ def build_interior(
     dpi: int | None = None,
     specs: dict | None = None,
     mode: str | None = None,
+    gutter: bool = True,
 ) -> dict:
     """Build the interior PDF and return a small summary dict.
 
     designs: cleaned black-on-white images, one per page/design.
     single_sided: insert a blank page after each design (coloring-book default).
     bleed: if True, page = trim + bleed and designs fill to the edge.
+    gutter: if True (no-bleed only), use a larger binding-side margin that
+        alternates left/right by page so nothing is lost in the spine.
     """
     specs = specs or kspecs.load_specs()
     dpi = dpi or kspecs.recommended_dpi(specs)
@@ -95,17 +97,27 @@ def build_interior(
     canvas_px = (round(page_w_in * dpi), round(page_h_in * dpi))
 
     total_pages = len(designs) * (2 if single_sided else 1)
-    margin_in = max(
-        kspecs.min_margin_in(specs, bleed),
-        kspecs.gutter_in(specs, total_pages),
-    )
-    margin_px = round(margin_in * dpi)
+    outer_in = kspecs.min_margin_in(specs, bleed)
+    inner_in = max(outer_in, kspecs.gutter_in(specs, total_pages))
+    sym_px = round(inner_in * dpi)
+    outer_px = round(outer_in * dpi)
+    inner_px = round(inner_in * dpi)
+
+    def margins_for(page_no: int):
+        # No asymmetry for bleed or when gutter is off: symmetric safe margin.
+        if mode == "fill" or not gutter:
+            return (sym_px, sym_px, sym_px, sym_px)
+        # Recto (odd page) binds on the left, verso (even) on the right.
+        if page_no % 2 == 1:
+            return (inner_px, outer_px, outer_px, outer_px)
+        return (outer_px, inner_px, outer_px, outer_px)
 
     doc = pymupdf.open()
     rect = pymupdf.Rect(0, 0, page_w_pt, page_h_pt)
-    for design in designs:
+    for i, design in enumerate(designs):
+        page_no = (2 * i + 1) if single_sided else (i + 1)
         page = doc.new_page(width=page_w_pt, height=page_h_pt)
-        canvas = _compose_page_canvas(design, canvas_px, margin_px, mode)
+        canvas = _compose_page_canvas(design, canvas_px, margins_for(page_no), mode)
         page.insert_image(rect, stream=_png_bytes(canvas))
         if single_sided:
             doc.new_page(width=page_w_pt, height=page_h_pt)  # blank back
@@ -125,7 +137,9 @@ def build_interior(
         "designs": len(designs),
         "pages": total_pages,
         "page_size_in": [round(page_w_in, 3), round(page_h_in, 3)],
-        "margin_in": round(margin_in, 3),
+        "gutter": bool(gutter and mode != "fill"),
+        "inner_margin_in": round(inner_in, 3),
+        "outer_margin_in": round(outer_in, 3),
     }
 
 

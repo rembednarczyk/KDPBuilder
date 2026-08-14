@@ -65,13 +65,16 @@ wyszukiwania, więc nie tłumacz fraz jeden do jednego.
 
 ### Pipeline i jakość
 
-- [ ] Rozkład marginesu na oprawę: asymetryczny gutter dla druku dwustronnego
-  (obecnie symetryczny margines bezpieczny).
-- [ ] Wariant formatu 8.5x8.5 (kwadrat sprzedaje się dobrze, wyróżnia na
-  miniaturce).
+- [x] Asymetryczny gutter na oprawę: większy margines po stronie oprawy,
+  naprzemiennie lewa/prawa wg strony (recto/verso). Flaga `--no-gutter` wraca do
+  symetrycznego. Domyślnie włączony dla druku bez spadu.
+- [ ] Wariant formatu 8.5x8.5: już obsługiwany przez specyfikacje i pipeline
+  (klucz trim `8.5x8.5`), do świadomego wyboru przy tytule. Nic do dobudowania.
 - [x] CI: `.github/workflows/ci.yml` uruchamia pytest na push do main i na PR
   (testy pokrywają walidator, skaner i pipeline).
-- [ ] Więcej tematów w bibliotece promptów poza aksolotkiem.
+- [x] Więcej tematów w bibliotece promptów: dinosaur, unicorn, ocean, cat
+  (plus aksolotl). Styl kawaii uczyniony neutralnym tematycznie (usunięte
+  axolotlowe "frilly gills").
 
 ## Zrobione
 

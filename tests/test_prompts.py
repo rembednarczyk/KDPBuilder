@@ -14,6 +14,22 @@ def test_library_loads(lib):
     assert "kawaii" in prompts.list_styles(lib)
 
 
+def test_all_themes_well_formed(lib):
+    for key in prompts.list_themes(lib):
+        t = lib["themes"][key]
+        assert t.get("subject_base") is not None
+        assert len(t.get("scenes", [])) >= 8
+        assert t.get("keywords_pl") and t.get("keywords_en")
+        # every theme can build a full book without error
+        pages = prompts.build_book(key, age="4-8", style="kawaii", count=5, lib=lib)
+        assert len(pages) == 5
+
+
+def test_new_themes_present(lib):
+    for key in ("dinosaur", "unicorn", "ocean", "cat"):
+        assert key in prompts.list_themes(lib)
+
+
 def test_core_and_negatives_always_present(lib):
     pair = prompts.build_pair("cute axolotl", age="5-6", style="kawaii", lib=lib)
     assert "coloring page" in pair["prompt"]

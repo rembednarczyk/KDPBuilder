@@ -67,6 +67,40 @@ def test_effective_dpi_is_300(tmp_path, designs):
     doc.close()
 
 
+def _side_gaps(pdf_path, page_index=0, dpi=100):
+    import numpy as np
+
+    doc = pymupdf.open(pdf_path)
+    pix = doc[page_index].get_pixmap(dpi=dpi, colorspace=pymupdf.csGRAY, alpha=False)
+    arr = np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.height, pix.width)
+    doc.close()
+    cols = np.where((arr < 128).any(axis=0))[0]
+    if cols.size == 0:
+        return None
+    return int(cols[0]), int(arr.shape[1] - 1 - cols[-1])  # (left_gap, right_gap)
+
+
+def test_gutter_shifts_design_toward_outer_edge(tmp_path):
+    from PIL import Image
+
+    black = Image.new("L", (1000, 1000), 0)  # fills its box exactly
+    out = tmp_path / "gut.pdf"
+    kassemble.build_interior([black], out, trim="8.5x11", single_sided=True, gutter=True, dpi=100)
+    left, right = _side_gaps(out)
+    # recto (page 1) binds on the left, so the inner (left) margin is larger
+    assert left > right + 5
+
+
+def test_no_gutter_is_symmetric(tmp_path):
+    from PIL import Image
+
+    black = Image.new("L", (1000, 1000), 0)
+    out = tmp_path / "nogut.pdf"
+    kassemble.build_interior([black], out, trim="8.5x11", single_sided=True, gutter=False, dpi=100)
+    left, right = _side_gaps(out)
+    assert abs(left - right) <= 2
+
+
 def test_end_to_end_validates_pass(tmp_path, designs):
     """A book built by the pipeline must pass the kdp-compliance validator."""
     cleaned = [imageprep.clean(d) for d in designs]
