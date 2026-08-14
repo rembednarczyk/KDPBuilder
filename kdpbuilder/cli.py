@@ -178,6 +178,8 @@ def cmd_cover(args) -> int:
             title=args.title, subtitle=args.subtitle, author=args.author, blurb=args.blurb,
             bg_color=args.bg, text_color=args.text, title_color=args.title_color,
             title_fill=args.title_fill, title_outline=args.title_outline,
+            title_outline2=args.title_outline2, title_grad_top=args.title_grad_top,
+            title_grad_bottom=args.title_grad_bottom, rich_title=not args.no_rich_title,
             banner_color=args.banner, banner_alpha=args.banner_alpha,
             thumbnails=thumbs, count_badge=args.count_badge,
             wrap=not args.no_wrap, decorations=not args.no_decorations,
@@ -417,7 +419,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--text", default="#213241", help="Text color for banner and back (hex).")
     p.add_argument("--title-color", default=None, help="Deprecated alias for --title-fill.")
     p.add_argument("--title-fill", default="#FFFFFF", help="Title letter color (hex).")
-    p.add_argument("--title-outline", default="#12303A", help="Title outline color (hex).")
+    p.add_argument("--title-outline", default="#12303A", help="Inner title outline color (hex).")
+    p.add_argument("--title-outline2", default="#FFFFFF", help="Outer title outline color (hex).")
+    p.add_argument("--title-grad-top", default=None, help="Title gradient top color (hex).")
+    p.add_argument("--title-grad-bottom", default=None, help="Title gradient bottom color (hex).")
+    p.add_argument("--no-rich-title", action="store_true", help="Use the plain outlined title instead of the rich effect.")
     p.add_argument("--banner", default="#FFFFFF", help="Subtitle banner color (hex).")
     p.add_argument("--banner-alpha", type=int, default=210, help="Banner opacity 0-255.")
     p.add_argument("--thumbs", default=None, help="Folder of interior images to show as back-cover thumbnails.")
