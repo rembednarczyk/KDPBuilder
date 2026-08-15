@@ -28,6 +28,30 @@ from . import specs as kspecs
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tif", ".tiff"}
 
 
+def _fill_from_book(args, keys):
+    """Fill top-level args from a book spec (books/<slug>.json) when --book is set.
+
+    A book spec is the single source of truth for one title. Only fills a field
+    that is still None, so an explicit flag always wins. Returns the parsed spec
+    (or None if --book was not given). 'count' maps to the spec's 'designs'.
+    """
+    if not getattr(args, "book", None):
+        return None
+    spec = json.loads(Path(args.book).read_text(encoding="utf-8"))
+    src = {
+        "theme": spec.get("theme"),
+        "age": spec.get("age"),
+        "style": spec.get("style"),
+        "count": spec.get("designs"),
+        "trim": spec.get("trim"),
+        "paper": spec.get("paper"),
+    }
+    for k in keys:
+        if getattr(args, k, None) is None and src.get(k) is not None:
+            setattr(args, k, src[k])
+    return spec
+
+
 def _list_images(folder: Path) -> list[Path]:
     return sorted(p for p in folder.iterdir() if p.suffix.lower() in IMAGE_EXTS)
 
@@ -69,6 +93,13 @@ def cmd_prompt(args) -> int:
 
 
 def cmd_book_prompts(args) -> int:
+    _fill_from_book(args, ["theme", "age", "style", "count"])
+    if args.count is None:
+        args.count = 40
+    missing = [k for k in ("theme", "age", "style") if not getattr(args, k)]
+    if missing:
+        sys.stderr.write("Provide --%s, or --book that has it.\n" % ", --".join(missing))
+        return 2
     lib = prompts.load_prompt_lib()
     try:
         pages = prompts.build_book(
@@ -99,6 +130,9 @@ def cmd_book_prompts(args) -> int:
 
 
 def cmd_generate(args) -> int:
+    _fill_from_book(args, ["theme", "age", "style", "count", "trim"])
+    if args.count is None:
+        args.count = 40
     lib = prompts.load_prompt_lib()
     if args.prompts:
         try:
@@ -116,7 +150,7 @@ def cmd_generate(args) -> int:
             sys.stderr.write(str(e) + "\n")
             return 2
     else:
-        sys.stderr.write("Provide --prompts FILE, or --theme --age --style to build them.\n")
+        sys.stderr.write("Provide --prompts FILE, --theme --age --style, or --book to build them.\n")
         return 2
 
     aspect = args.aspect
@@ -151,6 +185,7 @@ def cmd_cover(args) -> int:
         spec = json.loads(Path(args.book).read_text(encoding="utf-8"))
         cov = spec.get("cover", {})
         args.trim = args.trim or spec.get("trim")
+        args.theme = args.theme or spec.get("theme")
         args.paper = args.paper if args.paper != "bw_white" else spec.get("paper", "bw_white")
         if args.pages is None:
             args.pages = spec.get("pages") or (spec.get("designs", 0) * 2 or None)
@@ -436,10 +471,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(func=cmd_prompt)
 
     p = sub.add_parser("book-prompts", help="Build prompts for a whole book (one per page).")
-    p.add_argument("--theme", required=True, help="Theme key, e.g. axolotl.")
-    p.add_argument("--age", required=True, help="Age group: 3-4, 5-6, 6-7.")
-    p.add_argument("--style", required=True, help="Style: kawaii, cozy, seasonal, ...")
-    p.add_argument("--count", type=int, default=40, help="Number of designs (default 40).")
+    p.add_argument("--book", default=None, help="Book spec JSON (books/*.json); fills theme, age, style, count.")
+    p.add_argument("--theme", default=None, help="Theme key, e.g. axolotl (or from --book).")
+    p.add_argument("--age", default=None, help="Age group: 3-4, 5-6, 6-7 (or from --book).")
+    p.add_argument("--style", default=None, help="Style: kawaii, cozy, seasonal, ... (or from --book).")
+    p.add_argument("--count", type=int, default=None, help="Number of designs (default 40, or from --book).")
     p.add_argument("--season", help="Season for the seasonal style.")
     p.add_argument("--extra", nargs="*", default=None, help="Extra positive terms.")
     p.add_argument("--format", choices=["json", "csv"], default="json")
@@ -448,11 +484,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("generate", help="Generate raw line-art images via the Gemini API.")
     p.add_argument("--out", required=True, help="Folder for the generated PNGs.")
+    p.add_argument("--book", default=None, help="Book spec JSON (books/*.json); fills theme, age, style, count, trim.")
     p.add_argument("--prompts", help="Prompts file from book-prompts (.json or .csv).")
-    p.add_argument("--theme", help="Theme key (if not using --prompts).")
-    p.add_argument("--age", help="Age group (if not using --prompts).")
-    p.add_argument("--style", help="Style (if not using --prompts).")
-    p.add_argument("--count", type=int, default=40, help="Designs when building prompts inline.")
+    p.add_argument("--theme", help="Theme key (if not using --prompts or --book).")
+    p.add_argument("--age", help="Age group (if not using --prompts or --book).")
+    p.add_argument("--style", help="Style (if not using --prompts or --book).")
+    p.add_argument("--count", type=int, default=None, help="Designs when building prompts inline (default 40).")
     p.add_argument("--season", help="Season for the seasonal style.")
     p.add_argument("--trim", help="Trim key; sets the aspect ratio to match, e.g. 8.5x11.")
     p.add_argument("--aspect", help="Override aspect ratio (1:1, 3:4, 2:3, ...).")
