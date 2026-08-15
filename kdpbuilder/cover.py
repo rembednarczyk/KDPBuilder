@@ -327,6 +327,16 @@ def _fit_asset_to_box(asset, w, h):
     return asset.convert("RGBA").resize((max(1, int(w)), max(1, int(h))), Image.LANCZOS)
 
 
+def _fit_asset_contain(asset, max_w, max_h):
+    """Scale an asset to fit inside a box, preserving aspect ratio.
+
+    Used for a baked-in title graphic where stretching would distort letters.
+    """
+    a = asset.convert("RGBA")
+    scale = min(max_w / max(1, a.width), max_h / max(1, a.height))
+    return a.resize((max(1, int(a.width * scale)), max(1, int(a.height * scale))), Image.LANCZOS)
+
+
 def _paste_banner(layer, box, style, fill_rgb, border_rgb, radius, gradient=True):
     """Draw a decorative banner: colored fill, border ring, gradient and shadow."""
     x0, y0, x1, y1 = [int(v) for v in box]
@@ -369,6 +379,7 @@ def build_cover(
     title_grad_top=None,
     title_grad_bottom=None,
     rich_title=True,
+    title_asset: Image.Image | None = None,
     banner_color="#FFFFFF",
     banner_alpha=210,
     banner_style="scallop",
@@ -459,7 +470,13 @@ def build_cover(
     tit_fill = _hex(title_fill or title_color or "#FFFFFF") + (255,)
     tit_outline = _hex(title_outline) + (255,)
 
-    if title:
+    title_top = px(reg["bleed_in"] + safe)
+    if title_asset is not None:
+        # The asset IS the title: baked lettering from AI or a made-to-order PNG.
+        # The script places it and draws no text (still uses `title` for the spine).
+        fitted = _fit_asset_contain(title_asset, fw, px(2.6))
+        text.alpha_composite(fitted, (int(fcx - fitted.width / 2), int(title_top)))
+    elif title:
         font, lines, lh = _fit_block(tdraw, title, font_title, fw, px(2.6), int(fw * 0.22))
         if rich_title:
             g_top = _hex(title_grad_top) if title_grad_top else _hex(title_fill or "#FFE14D")
@@ -562,4 +579,5 @@ def build_cover(
         "wrap": bool(wrap),
         "thumbnails": len(thumbnails) if thumbnails else 0,
         "logo": logo is not None,
+        "title": "asset" if title_asset is not None else "script",
     }

@@ -54,6 +54,14 @@ Dwie osobne warstwy, nie mieszaj ich źródeł:
   wizualne (podtytuł, blurb) mają **własne, oddzielne prompty** dekoracji z
   `prompts.json` (`decoration_assets`). To wystarczy, keywords ich nie zasilają.
 
+Sloty pod dekorację z AI na okładce: `--subtitle-asset`, `--blurb-asset` (asset
+to tło, tekst dalej składa skrypt) oraz `--title-asset` (asset JEST tytułem, z
+wypalonymi literami, skrypt nie rysuje tekstu). `--title-asset` to jedyny
+wyjątek od reguły "tekst zawsze składa skrypt": przy nim liternictwo robi AI
+albo gotowy PNG. Jeśli używasz, koniecznie sprawdź polską pisownię i diakrytyki
+na wyniku, bo model potrafi je przekręcić. Tytuł napędzany specem dalej idzie na
+grzbiet składany skryptem, niezależnie od assetu.
+
 ## Komendy
 
 Spec książki (`--book books/<slug>.json`) zasila `book-prompts`, `generate` i
