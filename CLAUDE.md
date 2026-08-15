@@ -56,13 +56,17 @@ Dwie osobne warstwy, nie mieszaj ich źródeł:
 
 ## Komendy
 
+Spec książki (`--book books/<slug>.json`) zasila `book-prompts`, `generate` i
+`cover`: temat, wiek, styl, liczbę wzorów, trim, teksty i kolory okładki. Jawne
+flagi wciąż wygrywają ze specem.
+
 ```bash
 python -m kdpbuilder.cli catalog
-python -m kdpbuilder.cli book-prompts --theme axolotl --age 5-6 --style kawaii --count 40 --format csv --out prompts.csv
-python -m kdpbuilder.cli generate --out raw/ --prompts prompts.csv --trim 8.5x11 --image-size 4K
+python -m kdpbuilder.cli book-prompts --book books/axolotl_5-6.json --format csv --out prompts.csv
+python -m kdpbuilder.cli generate --out raw/ --book books/axolotl_5-6.json
 python -m kdpbuilder.cli build raw/ --out interior.pdf --trim 8.5x11 --thicken 1 --strict
 python -m kdpbuilder.cli scan interior.pdf --trim 8.5x11
-python -m kdpbuilder.cli cover --out cover.pdf --trim 8.5x11 --pages 80 --theme axolotl --generate-front --title "..." --author "Kolorowe Skarby"
+python -m kdpbuilder.cli cover --out cover.pdf --book books/axolotl_5-6.json --generate-front
 python -m pytest
 ```
 
