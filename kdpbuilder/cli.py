@@ -234,6 +234,12 @@ def cmd_cover(args) -> int:
         if path and Path(path).exists():
             banner_assets[slot] = kcover.load_logo_image(path)
     banner_assets = banner_assets or None
+    title_asset = None
+    if args.title_asset:
+        if not Path(args.title_asset).exists():
+            sys.stderr.write("Title asset not found: %s\n" % args.title_asset)
+            return 2
+        title_asset = kcover.load_logo_image(args.title_asset)
     thumbs = None
     if args.thumbs:
         tdir = Path(args.thumbs)
@@ -247,6 +253,7 @@ def cmd_cover(args) -> int:
             title_fill=args.title_fill, title_outline=args.title_outline,
             title_outline2=args.title_outline2, title_grad_top=args.title_grad_top,
             title_grad_bottom=args.title_grad_bottom, rich_title=not args.no_rich_title,
+            title_asset=title_asset,
             banner_color=args.banner, banner_alpha=args.banner_alpha,
             banner_style=args.banner_style, banner_border=args.banner_border,
             banner_text_color=args.banner_text, banner_assets=banner_assets,
@@ -534,6 +541,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--banner-text", default=None, help="Banner text color (hex); auto-contrast by default.")
     p.add_argument("--subtitle-asset", default=None, help="Decoration asset (SVG/PNG) for the subtitle banner slot.")
     p.add_argument("--blurb-asset", default=None, help="Decoration asset (SVG/PNG) for the back blurb slot.")
+    p.add_argument("--title-asset", default=None,
+                   help="Baked title graphic (SVG/PNG with lettering). Replaces the script title; "
+                        "no text is drawn. AI-generated PL lettering: proofread the spelling.")
     p.add_argument("--thumbs", default=None, help="Folder of interior images to show as back-cover thumbnails.")
     p.add_argument("--count-badge", default=None, help="Text for the front count sticker, e.g. '40 wzorow'.")
     p.add_argument("--logo", default=None, help="Publisher logo (SVG or transparent PNG). Defaults to the bundled Kolorowe Skarby logo.")

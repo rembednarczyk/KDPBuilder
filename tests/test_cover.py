@@ -96,6 +96,31 @@ def test_banner_asset_slot(tmp_path, specs, front):
     assert pymupdf.open(out).page_count == 1
 
 
+def test_title_asset_replaces_script_title(tmp_path, specs, front):
+    # a baked title graphic is placed as-is; the summary marks the title source
+    # as 'asset', and the string title is still used for the spine.
+    title_img = Image.new("RGBA", (1400, 400), (0, 0, 0, 0))
+    ImageDraw.Draw(title_img).text((40, 120), "AKSOLOTKI", fill=(255, 200, 0, 255))
+    out = tmp_path / "title_asset.pdf"
+    summary = kcover.build_cover(
+        front, out, trim="8.5x11", page_count=80, paper="bw_white",
+        title="Aksolotki", author="Kolorowe Skarby",
+        title_asset=title_img, dpi=120, specs=specs,
+    )
+    assert summary["title"] == "asset"
+    assert summary["spine_text"] == "included"  # spine still built from the string
+    assert pymupdf.open(out).page_count == 1
+
+
+def test_default_title_is_script(tmp_path, specs, front):
+    out = tmp_path / "title_script.pdf"
+    summary = kcover.build_cover(
+        front, out, trim="8.5x11", page_count=80, paper="bw_white",
+        title="Aksolotki", dpi=120, specs=specs,
+    )
+    assert summary["title"] == "script"
+
+
 def test_logo_placed(tmp_path, specs, front):
     logo = Image.new("RGBA", (400, 200), (0, 0, 0, 0))
     ImageDraw.Draw(logo).rounded_rectangle((10, 10, 390, 190), radius=30, fill=(255, 0, 0, 255))
