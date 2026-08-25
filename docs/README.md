@@ -13,6 +13,9 @@ indeksu. Pamięć projektu i reguły są w `../CLAUDE.md`.
   tytuł, podtytuł, 7 tagów, opis, kategorie.
 - [cover_slots.svg](cover_slots.svg) mapa okładki: które obszary składa skrypt,
   które są slotami pod dekoracje z AI, gdzie idzie logo i strefa kodu kreskowego.
+- [cover_full_ai_experiment.md](cover_full_ai_experiment.md) test okładki w
+  całości od modelu (Pro, jeden spójny obraz wrapa): wnioski, ryzyka pod KDP,
+  kierunki A (czysto AI) vs B (hybryda pod publikację).
 
 Narzędzie: `python -m kdpbuilder.cli keywords <pliki> --contains niche` wyciąga
 kandydackie frazy z częstością z zapisanych aukcji konkurencji. Przydatne flagi:
