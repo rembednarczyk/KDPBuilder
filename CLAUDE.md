@@ -125,6 +125,15 @@ Dźwignie oszczędności, od najważniejszej:
 - **Regeneruj tylko słabe strony**, nie całą książkę. Usuń pliki wybranych
   wzorów i uruchom `generate` z resume; dogeneruje tylko brakujące.
 
+## Persystencja opłaconych grafik (reguła)
+
+Każda płatna generacja jest ulotna, dopóki nie trafi poza kontener (scratchpad
+kasuje się przy recyklingu). Po udanej generacji:
+
+- (a) surowe oryginały **wysyłamy do użytkownika** do trzymania lokalnie,
+- (b) do repo commitujemy **tylko wybrane finały** (okładka + wnętrze danego
+  tytułu), ewentualnie przez Git LFS, jeśli zdecydujemy trzymać binaria w repo.
+
 ## Baza wiedzy (reguła)
 
 Zbieramy wiedzę. Każde badanie, decyzja i wniosek ląduje jako plik markdown w
@@ -135,6 +144,8 @@ przechodzi między sesjami i się nie gubi. Aktualne dokumenty:
 - `docs/README.md` indeks bazy wiedzy.
 - `docs/TODO.md` plan i backlog.
 - `docs/seo_axolotl_pl.md` badanie SEO pod Amazon.pl (aksolotki).
+- `docs/cover_full_ai_experiment.md` test w pełni AI okładki (Pro utrzymuje
+  polski; kierunki A czysto AI vs B hybryda pod publikację).
 
 ## SEO i słowa kluczowe (ważne)
 
